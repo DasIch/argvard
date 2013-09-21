@@ -34,6 +34,20 @@ class Argvard(object):
         if not parts or not parts[0]:
             raise InvalidSignature('option name missing')
         name = parts[0]
+        if name.startswith('--'):
+            if len(name) == 2:
+                raise InvalidSignature(
+                    'option with long prefix is missing a name'
+                )
+        elif name.startswith('-'):
+            if len(name) == 1:
+                raise InvalidSignature(
+                    'option with short prefix is missing a name'
+                )
+            elif len(name) > 2:
+                raise InvalidSignature(
+                    'short option with name longer than one character: %s' % name
+                )
         if name in self.options:
             raise RuntimeError('%s is already defined' % name)
         if parts[1:]:

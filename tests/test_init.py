@@ -18,6 +18,18 @@ class TestArgvard(object):
             def foo():
                 pass
 
+    @pytest.mark.parametrize('name', [
+        '--',
+        '-',
+        '-foo'
+    ])
+    def test_option_with_bad_name(self, name):
+        argvard = Argvard()
+        with pytest.raises(InvalidSignature):
+            @argvard.option(name)
+            def option():
+                pass
+
     def test_define_option_twice(self):
         argvard = Argvard()
         @argvard.option('--option')

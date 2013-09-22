@@ -81,10 +81,34 @@ class Argvard(object):
     def call_main(self, argv):
         self.main_signature.call_with_arguments(self.main_func, argv)
 
+    def normalize_argv(self, argv):
+        rv = []
+        for i, argument in enumerate(argv):
+            if argument == '--':
+                rv.extend(argv[i:])
+                break
+            elif argument.startswith('--') and '=' in argument:
+                rv.extend(argument.split('=', 1))
+            elif argument.startswith('-') and not argument.startswith('--'):
+                if argument[1:] and '-' + argument[1] in self.options:
+                    rv.append('-' + argument[1])
+                    for j, character in enumerate(argument[2:], start=2):
+                        if '-' + character in self.options:
+                            rv.append('-' + character)
+                        else:
+                            rv.append(argument[j:])
+                            break
+                else:
+                    rv.append(argument)
+
+            else:
+                rv.append(argument)
+        return rv
+
     def __call__(self, argv):
         if self.main_func is None:
             raise RuntimeError('main is undefined')
-        argv = Argv(argv)
+        argv = Argv(self.normalize_argv(argv))
         self.call_options(argv)
         self.call_main(argv)
 

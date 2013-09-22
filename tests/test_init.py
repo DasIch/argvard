@@ -81,6 +81,57 @@ class TestArgvard(object):
         argvard(['application', '--option', 'foo'])
         assert called == ['foo']
 
+    def test_option_short_with_concatenated_argument(self):
+        called = []
+        argvard = Argvard()
+        @argvard.option('-o argument')
+        def option(argument):
+            called.append(argument)
+        argvard.main()(lambda: None)
+        argvard(['application', '-ofoo'])
+        assert called == ['foo']
+
+    def test_option_multiple_shorts(self):
+        called = []
+        argvard = Argvard()
+        @argvard.option('-a')
+        def a():
+            called.append('a')
+        @argvard.option('-b')
+        def b():
+            called.append('b')
+        argvard.main()(lambda: None)
+        argvard(['application', '-ab'])
+        assert called == ['a', 'b']
+
+    def test_short_option_lookalike(self):
+        called = []
+        argvard = Argvard()
+        @argvard.main('argument')
+        def main(argument):
+            called.append(argument)
+        argvard(['application', '-foobar'])
+        assert called == ['-foobar']
+
+    def test_short_option_prefix(self):
+        called = []
+        argvard = Argvard()
+        @argvard.main('argument')
+        def main(argument):
+            called.append(argument)
+        argvard(['application', '-'])
+        assert called == ['-']
+
+    def test_long_option_with_concatenated_argument(self):
+        called = []
+        argvard = Argvard()
+        @argvard.option('--option argument')
+        def option(argument):
+            called.append(argument)
+        argvard.main()(lambda: None)
+        argvard(['application', '--option=foobar'])
+        assert called == ['foobar']
+
     def test_define_main_twice(self):
         argvard = Argvard()
         @argvard.main()

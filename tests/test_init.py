@@ -21,7 +21,9 @@
 """
 import pytest
 
-from argvard import Argvard, InvalidSignature, ArgumentMissing
+from argvard import (
+    Argvard, InvalidSignature, ArgumentMissing, UnexpectedArgument
+)
 
 
 class TestArgvard(object):
@@ -156,6 +158,8 @@ class TestArgvard(object):
             called.append(True)
         argvard(['application'])
         assert called == [True]
+        with pytest.raises(UnexpectedArgument):
+            argvard(['application', 'unexpected'])
 
     def test_main_with_signature(self):
         called = []

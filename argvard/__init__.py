@@ -79,7 +79,11 @@ class Argvard(object):
                 break
 
     def call_main(self, argv):
-        self.main_signature.call_with_arguments(self.main_func, argv)
+        arguments = self.main_signature.parse(argv)
+        remaining = list(argv)
+        if remaining:
+            raise UnexpectedArgument(remaining[0])
+        self.main_func(**arguments)
 
     def normalize_argv(self, argv):
         rv = []
@@ -165,4 +169,8 @@ class InvalidSignature(Exception):
 
 
 class ArgumentMissing(Exception):
+    pass
+
+
+class UnexpectedArgument(Exception):
     pass

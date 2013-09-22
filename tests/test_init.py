@@ -22,11 +22,28 @@
 import pytest
 
 from argvard import (
-    Argvard, InvalidSignature, ArgumentMissing, UnexpectedArgument
+    Argvard, Command, InvalidSignature, ArgumentMissing, UnexpectedArgument
 )
 
 
 class TestArgvard(object):
+    def test_register_command(self):
+        called = []
+        argvard = Argvard()
+        @argvard.main()
+        def foo():
+            called.append('application')
+        command = Command()
+        @command.main()
+        def bar():
+            called.append('command')
+        argvard.register_command('command', command)
+        argvard(['application'])
+        assert called == ['application']
+        del called[:]
+        argvard(['application', 'command'])
+        assert called == ['command']
+
     def test_option_without_name(self):
         argvard = Argvard()
         with pytest.raises(InvalidSignature):

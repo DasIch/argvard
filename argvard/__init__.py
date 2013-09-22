@@ -23,11 +23,17 @@ from argvard.utils import is_python_identifier
 from argvard._compat import implements_iterator
 
 
-class Argvard(object):
+class ExecutableBase(object):
     def __init__(self):
         self.main_func = None
         self.main_signature = None
         self.options = {}
+        self.commands = {}
+
+    def register_command(self, name, command):
+        if name in self.commands:
+            raise RuntimeError('%s is already defined' % name)
+        self.commands[name] = command
 
     def option(self, signature):
         parts = signature.split(' ', 1)
@@ -78,6 +84,19 @@ class Argvard(object):
                 argv.position -= 1
                 break
 
+    def call_commands(self, argv):
+        try:
+            argument = next(argv)
+        except StopIteration:
+            pass
+        else:
+            if argument in self.commands:
+                self.commands[argument](argv)
+                return True
+            else:
+                argv.position -= 1
+                return False
+
     def call_main(self, argv):
         arguments = self.main_signature.parse(argv)
         remaining = list(argv)
@@ -109,12 +128,24 @@ class Argvard(object):
                 rv.append(argument)
         return rv
 
+
+class Argvard(ExecutableBase):
     def __call__(self, argv):
         if self.main_func is None:
             raise RuntimeError('main is undefined')
         argv = Argv(self.normalize_argv(argv))
         self.call_options(argv)
-        self.call_main(argv)
+        if not self.call_commands(argv):
+            self.call_main(argv)
+
+
+class Command(ExecutableBase):
+    def __call__(self, argv):
+        if self.main_func is None:
+            raise RuntimeError('main is undefined')
+        self.call_options(argv)
+        if not self.call_commands(argv):
+            self.call_main(argv)
 
 
 @implements_iterator

@@ -44,6 +44,13 @@ class TestArgvard(object):
         argvard(['application', 'command'])
         assert called == ['command']
 
+    def test_command_ordering(self):
+        argvard = Argvard()
+        command = Command()
+        argvard.register_command('foo', command)
+        argvard.register_command('bar', command)
+        assert list(argvard.commands.keys()) == ['foo', 'bar']
+
     def test_option_without_name(self):
         argvard = Argvard()
         with pytest.raises(InvalidSignature):
@@ -150,6 +157,16 @@ class TestArgvard(object):
         argvard.main()(lambda: None)
         argvard(['application', '--option=foobar'])
         assert called == ['foobar']
+
+    def test_option_ordering(self):
+        argvard = Argvard()
+        @argvard.option('-a')
+        def foo():
+            pass
+        @argvard.option('-b')
+        def bar():
+            pass
+        assert list(argvard.options.keys()) == ['-a', '-b']
 
     def test_define_main_twice(self):
         argvard = Argvard()

@@ -19,6 +19,8 @@
     :copyright: 2013 by Daniel Neuhäuser
     :license: Apache License 2.0, see LICENSE for more details
 """
+from collections import OrderedDict
+
 from argvard.utils import is_python_identifier
 from argvard._compat import implements_iterator
 
@@ -27,8 +29,8 @@ class ExecutableBase(object):
     def __init__(self):
         self.main_func = None
         self.main_signature = None
-        self.options = {}
-        self.commands = {}
+        self.options = OrderedDict()
+        self.commands = OrderedDict()
 
     def register_command(self, name, command):
         if name in self.commands:

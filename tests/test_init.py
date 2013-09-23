@@ -81,6 +81,19 @@ class TestArgvard(object):
             def bar():
                 pass
 
+    def test_option_overrideable(self):
+        called = []
+        argvard = Argvard()
+        @argvard.option('--option', overrideable=True)
+        def foo():
+            called.append('foo')
+        @argvard.option('--option')
+        def bar():
+            called.append('bar')
+        argvard.main()(lambda: None)
+        argvard(['application', '--option'])
+        assert called == ['bar']
+
     def test_option(self):
         called = []
         argvard = Argvard()

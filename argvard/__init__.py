@@ -37,7 +37,7 @@ class ExecutableBase(object):
             raise RuntimeError('%s is already defined' % name)
         self.commands[name] = command
 
-    def option(self, signature):
+    def option(self, signature, overrideable=False):
         parts = signature.split(' ', 1)
         if not parts or not parts[0]:
             raise InvalidSignature('option name missing')
@@ -56,14 +56,16 @@ class ExecutableBase(object):
                 raise InvalidSignature(
                     'short option with name longer than one character: %s' % name
                 )
-        if name in self.options:
+        if name in self.options and not self.options[name].overrideable:
             raise RuntimeError('%s is already defined' % name)
         if parts[1:]:
             signature = Signature.from_string(parts[1])
         else:
             signature = Signature([])
         def decorator(function):
-            self.options[name] = Option(function, signature)
+            self.options[name] = Option(
+                function, signature, overrideable=overrideable
+            )
             return function
         return decorator
 
@@ -169,9 +171,10 @@ class Argv(object):
 
 
 class Option(object):
-    def __init__(self, function, signature):
+    def __init__(self, function, signature, overrideable=False):
         self.function = function
         self.signature = signature
+        self.overrideable = overrideable
 
     def call(self, argv):
         self.signature.call_with_arguments(self.function, argv)

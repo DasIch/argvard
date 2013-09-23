@@ -63,7 +63,7 @@ class ExecutableBase(object):
         else:
             signature = Signature([])
         def decorator(function):
-            self.options[name] = signature, function
+            self.options[name] = Option(function, signature)
             return function
         return decorator
 
@@ -80,8 +80,8 @@ class ExecutableBase(object):
     def call_options(self, argv):
         for argument in argv:
             if argument in self.options:
-                signature, function = self.options[argument]
-                signature.call_with_arguments(function, argv)
+                option = self.options[argument]
+                option.call(argv)
             else:
                 argv.position -= 1
                 break
@@ -166,6 +166,15 @@ class Argv(object):
             raise StopIteration()
         self.position += 1
         return argument
+
+
+class Option(object):
+    def __init__(self, function, signature):
+        self.function = function
+        self.signature = signature
+
+    def call(self, argv):
+        self.signature.call_with_arguments(self.function, argv)
 
 
 class Signature(object):

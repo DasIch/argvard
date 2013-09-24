@@ -31,11 +31,11 @@ class TestArgvard(object):
         called = []
         argvard = Argvard()
         @argvard.main()
-        def foo():
+        def foo(context):
             called.append('application')
         command = Command()
         @command.main()
-        def bar():
+        def bar(context):
             called.append('command')
         argvard.register_command('command', command)
         argvard(['application'])
@@ -85,12 +85,12 @@ class TestArgvard(object):
         called = []
         argvard = Argvard()
         @argvard.option('--option', overrideable=True)
-        def foo():
+        def foo(context):
             called.append('foo')
         @argvard.option('--option')
-        def bar():
+        def bar(context):
             called.append('bar')
-        argvard.main()(lambda: None)
+        argvard.main()(lambda context: None)
         argvard(['application', '--option'])
         assert called == ['bar']
 
@@ -98,9 +98,9 @@ class TestArgvard(object):
         called = []
         argvard = Argvard()
         @argvard.option('--option')
-        def option():
+        def option(context):
             called.append(True)
-        argvard.main()(lambda: None)
+        argvard.main()(lambda context: None)
         argvard(['application'])
         assert called == []
         argvard(['application', '--option'])
@@ -110,9 +110,9 @@ class TestArgvard(object):
         called = []
         argvard = Argvard()
         @argvard.option('--option argument')
-        def option(argument):
+        def option(context, argument):
             called.append(argument)
-        argvard.main()(lambda: None)
+        argvard.main()(lambda context: None)
         argvard(['application'])
         assert called == []
         with pytest.raises(ArgumentMissing):
@@ -124,9 +124,9 @@ class TestArgvard(object):
         called = []
         argvard = Argvard()
         @argvard.option('-o argument')
-        def option(argument):
+        def option(context, argument):
             called.append(argument)
-        argvard.main()(lambda: None)
+        argvard.main()(lambda context: None)
         argvard(['application', '-ofoo'])
         assert called == ['foo']
 
@@ -134,12 +134,12 @@ class TestArgvard(object):
         called = []
         argvard = Argvard()
         @argvard.option('-a')
-        def a():
+        def a(context):
             called.append('a')
         @argvard.option('-b')
-        def b():
+        def b(context):
             called.append('b')
-        argvard.main()(lambda: None)
+        argvard.main()(lambda context: None)
         argvard(['application', '-ab'])
         assert called == ['a', 'b']
 
@@ -147,7 +147,7 @@ class TestArgvard(object):
         called = []
         argvard = Argvard()
         @argvard.main('argument')
-        def main(argument):
+        def main(context, argument):
             called.append(argument)
         argvard(['application', '-foobar'])
         assert called == ['-foobar']
@@ -156,7 +156,7 @@ class TestArgvard(object):
         called = []
         argvard = Argvard()
         @argvard.main('argument')
-        def main(argument):
+        def main(context, argument):
             called.append(argument)
         argvard(['application', '-'])
         assert called == ['-']
@@ -165,9 +165,9 @@ class TestArgvard(object):
         called = []
         argvard = Argvard()
         @argvard.option('--option argument')
-        def option(argument):
+        def option(context, argument):
             called.append(argument)
-        argvard.main()(lambda: None)
+        argvard.main()(lambda context: None)
         argvard(['application', '--option=foobar'])
         assert called == ['foobar']
 
@@ -201,7 +201,7 @@ class TestArgvard(object):
         called = []
         argvard = Argvard()
         @argvard.main()
-        def main():
+        def main(context):
             called.append(True)
         argvard(['application'])
         assert called == [True]
@@ -212,7 +212,60 @@ class TestArgvard(object):
         called = []
         argvard = Argvard()
         @argvard.main('name')
-        def main(name):
+        def main(context, name):
             called.append(name)
         argvard(['application', 'name'])
         assert called == ['name']
+
+    def test_defaults(self):
+        argvard = Argvard(defaults={'a': 1})
+        @argvard.option('-a')
+        def option(context):
+            assert 'a' in context
+            assert context['a'] == 1
+        argvard.main()(lambda context: None)
+        argvard(['application', '-a'])
+
+    def test_context_inherited_by_commands(self):
+        argvard = Argvard()
+        @argvard.option('-a')
+        def option(context):
+            context['a'] = 1
+        argvard.main()(lambda context: None)
+        command = Command()
+        @command.main()
+        def main(context):
+            assert 'a' in context
+            assert context['a'] == 1
+        argvard.register_command('command', command)
+        argvard(['application', '-a', 'command'])
+
+    def test_command_defaults(self):
+        argvard = Argvard()
+        @argvard.option('-a')
+        def option(context):
+            context['a'] = 1
+        argvard.main()(lambda context: None)
+        command = Command(defaults={'b': 1})
+        @command.main()
+        def main(context):
+            assert 'a' in context
+            assert context['a'] == 1
+            assert 'b' in context
+            assert context['b'] == 1
+        argvard.register_command('command', command)
+        argvard(['application', '-a', 'command'])
+
+    def test_command_defaults_dont_override_context(self):
+        argvard = Argvard()
+        @argvard.option('-a')
+        def option(context):
+            context['a'] = 1
+        argvard.main()(lambda context: None)
+        command = Command(defaults={'a': 2})
+        @command.main()
+        def main(context):
+            assert 'a' in context
+            assert context['a'] == 1
+        argvard.register_command('command', command)
+        argvard(['application', '-a', 'command'])

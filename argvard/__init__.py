@@ -19,14 +19,17 @@
     :copyright: 2013 by Daniel Neuhäuser
     :license: Apache License 2.0, see LICENSE for more details
 """
+from functools import partial
 from collections import OrderedDict
 
 from argvard.utils import is_python_identifier
-from argvard._compat import implements_iterator
+from argvard._compat import implements_iterator, iteritems
 
 
 class ExecutableBase(object):
-    def __init__(self):
+    def __init__(self, defaults=None):
+        self.defaults = {} if defaults is None else defaults
+
         self.main_func = None
         self.main_signature = None
         self.options = OrderedDict()
@@ -79,34 +82,34 @@ class ExecutableBase(object):
             return function
         return decorator
 
-    def call_options(self, argv):
+    def call_options(self, context, argv):
         for argument in argv:
             if argument in self.options:
                 option = self.options[argument]
-                option.call(argv)
+                option.call(context, argv)
             else:
                 argv.position -= 1
                 break
 
-    def call_commands(self, argv):
+    def call_commands(self, context, argv):
         try:
             argument = next(argv)
         except StopIteration:
             pass
         else:
             if argument in self.commands:
-                self.commands[argument](argv)
+                self.commands[argument](context, argv)
                 return True
             else:
                 argv.position -= 1
                 return False
 
-    def call_main(self, argv):
+    def call_main(self, context, argv):
         arguments = self.main_signature.parse(argv)
         remaining = list(argv)
         if remaining:
             raise UnexpectedArgument(remaining[0])
-        self.main_func(**arguments)
+        self.main_func(context, **arguments)
 
     def normalize_argv(self, argv):
         rv = []
@@ -134,22 +137,31 @@ class ExecutableBase(object):
 
 
 class Argvard(ExecutableBase):
+    def create_context(self):
+        return self.defaults.copy()
+
     def __call__(self, argv):
         if self.main_func is None:
             raise RuntimeError('main is undefined')
         argv = Argv(self.normalize_argv(argv))
-        self.call_options(argv)
-        if not self.call_commands(argv):
-            self.call_main(argv)
+        context = self.create_context()
+        self.call_options(context, argv)
+        if not self.call_commands(context, argv):
+            self.call_main(context, argv)
 
 
 class Command(ExecutableBase):
-    def __call__(self, argv):
+    def update_context(self, context):
+        for key, value in iteritems(self.defaults):
+            context.setdefault(key, value)
+
+    def __call__(self, context, argv):
         if self.main_func is None:
             raise RuntimeError('main is undefined')
-        self.call_options(argv)
-        if not self.call_commands(argv):
-            self.call_main(argv)
+        self.update_context(context)
+        self.call_options(context, argv)
+        if not self.call_commands(context, argv):
+            self.call_main(context, argv)
 
 
 @implements_iterator
@@ -176,8 +188,10 @@ class Option(object):
         self.signature = signature
         self.overrideable = overrideable
 
-    def call(self, argv):
-        self.signature.call_with_arguments(self.function, argv)
+    def call(self, context, argv):
+        self.signature.call_with_arguments(
+            partial(self.function, context), argv
+        )
 
 
 class Signature(object):

@@ -40,8 +40,7 @@ class ExecutableBase(object):
         self.add_default_options()
 
     def add_default_options(self):
-        @self.option('-h', overrideable=True)
-        @self.option('--help', overrideable=True)
+        @self.option('-h|--help', overrideable=True)
         def help(context):
             print(u'usage: %s' %
                 (context.command or context.argvard).get_usage(context)

@@ -32,11 +32,17 @@ if PY2:
         cls.next.im_func.__name__ = 'next'
         return cls
 
+    def itervalues(d):
+        return d.itervalues()
+
     def iteritems(d):
         return d.iteritems()
 else:
     def implements_iterator(cls):
         return cls
+
+    def itervalues(d):
+        return iter(d.values())
 
     def iteritems(d):
         return iter(d.items())

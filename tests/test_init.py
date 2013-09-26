@@ -27,6 +27,29 @@ from argvard import (
 
 
 class TestArgvard(object):
+    def test_get_usage(self):
+        argvard = Argvard()
+        @argvard.main()
+        def main(context):
+            assert context.argvard.get_usage(context) == u'application'
+        argvard(['application'])
+
+        argvard = Argvard()
+        @argvard.option('--foo')
+        def option(context):
+            pass
+        @argvard.main()
+        def main2(context):
+            assert context.argvard.get_usage(context) == u'application [--foo]'
+        argvard(['application'])
+
+        argvard = Argvard()
+        @argvard.main('foo bar')
+        def main3(context, foo, bar):
+            assert context.argvard.get_usage(context) == u'application <foo> <bar>'
+
+        argvard(['application', 'foo', 'bar'])
+
     def test_register_command(self):
         called = []
         argvard = Argvard()
@@ -50,6 +73,37 @@ class TestArgvard(object):
         argvard.register_command('foo', command)
         argvard.register_command('bar', command)
         assert list(argvard.commands.keys()) == ['foo', 'bar']
+
+    def test_command_get_usage(self):
+        argvard = Argvard()
+        argvard.main()(lambda context: None)
+        command = Command()
+        @command.main()
+        def main(context):
+            assert context.argvard.get_usage(context) == 'application command'
+        argvard.register_command('command', command)
+        argvard(['application', 'command'])
+
+        argvard = Argvard()
+        argvard.main()(lambda context: None)
+        command = Command()
+        @command.option('--foo')
+        def option(context):
+            pass
+        @command.main()
+        def main2(context):
+            assert context.command.get_usage(context) == 'application command [--foo]'
+        argvard.register_command('command', command)
+        argvard(['application', 'command'])
+
+        argvard = Argvard()
+        argvard.main()(lambda context: None)
+        command = Command()
+        @command.main('foo bar')
+        def main3(context, foo, bar):
+            assert context.command.get_usage(context) == 'application command <foo> <bar>'
+        argvard.register_command('command', command)
+        argvard(['application', 'command', 'foo', 'bar'])
 
     def test_option_without_name(self):
         argvard = Argvard()

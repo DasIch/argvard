@@ -23,7 +23,7 @@ from functools import partial
 from collections import OrderedDict
 
 from argvard.utils import is_python_identifier
-from argvard._compat import implements_iterator, iteritems
+from argvard._compat import implements_iterator, iteritems, itervalues
 
 
 class ExecutableBase(object):
@@ -34,6 +34,16 @@ class ExecutableBase(object):
         self.main_signature = None
         self.options = OrderedDict()
         self.commands = OrderedDict()
+
+    def get_usage(self, context):
+        usage = u' '.join(context.command_path)
+        if self.options:
+            usage += u' ' + ' '.join(
+                u'[%s]' % option.usage for option in itervalues(self.options)
+            )
+        if self.main_signature and self.main_signature.arguments:
+            usage += u' ' + self.main_signature.usage
+        return usage
 
     def register_command(self, name, command):
         if name in self.commands:
@@ -198,7 +208,10 @@ class Option(object):
 
     @property
     def usage(self):
-        return u'%s %s' % (self.name, self.signature.usage)
+        usage = self.name
+        if self.signature.usage:
+            usage += u' ' + self.signature.usage
+        return usage
 
     def call(self, context, argv):
         self.signature.call_with_arguments(

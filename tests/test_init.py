@@ -27,11 +27,61 @@ from argvard import (
 
 
 class TestArgvard(object):
+    def test_help_option(self, capsys):
+        argvard = Argvard()
+        argvard.main()(lambda context: None)
+        with pytest.raises(SystemExit) as exception:
+            argvard(['application', '-h'])
+        assert exception.value.code == 1
+        stdout, stderr = capsys.readouterr()
+        assert stderr == u''
+        assert stdout == (
+            u'usage: application [--help] [-h]\n'
+            u'\n'
+            u'options:\n'
+            u'--help\n'
+            u'-h\n'
+        )
+
+        argvard = Argvard()
+        argvard.main()(lambda context: None)
+        command = Command()
+        command.main()(lambda context: None)
+        argvard.register_command('command', command)
+        with pytest.raises(SystemExit) as exception:
+            argvard(['application', '-h'])
+        assert exception.value.code == 1
+        stdout, stderr = capsys.readouterr()
+        assert stderr == u''
+        assert stdout == (
+            u'usage: application [--help] [-h]\n'
+            u'\n'
+            u'options:\n'
+            u'--help\n'
+            u'-h\n'
+            u'\n'
+            u'commands:\n'
+            u'command\n'
+        )
+
+        with pytest.raises(SystemExit) as exception:
+            argvard(['application', 'command', '-h'])
+        assert exception.value.code == 1
+        stdout, stderr = capsys.readouterr()
+        assert stderr == u''
+        assert stdout == (
+            u'usage: application command [--help] [-h]\n'
+            u'\n'
+            u'options:\n'
+            u'--help\n'
+            u'-h\n'
+        )
+
     def test_get_usage(self):
         argvard = Argvard()
         @argvard.main()
         def main(context):
-            assert context.argvard.get_usage(context) == u'application'
+            assert context.argvard.get_usage(context) == u'application [--help] [-h]'
         argvard(['application'])
 
         argvard = Argvard()
@@ -40,13 +90,13 @@ class TestArgvard(object):
             pass
         @argvard.main()
         def main2(context):
-            assert context.argvard.get_usage(context) == u'application [--foo]'
+            assert context.argvard.get_usage(context) == u'application [--help] [-h] [--foo]'
         argvard(['application'])
 
         argvard = Argvard()
         @argvard.main('foo bar')
         def main3(context, foo, bar):
-            assert context.argvard.get_usage(context) == u'application <foo> <bar>'
+            assert context.argvard.get_usage(context) == u'application [--help] [-h] <foo> <bar>'
 
         argvard(['application', 'foo', 'bar'])
 
@@ -80,7 +130,7 @@ class TestArgvard(object):
         command = Command()
         @command.main()
         def main(context):
-            assert context.argvard.get_usage(context) == 'application command'
+            assert context.argvard.get_usage(context) == 'application command [--help] [-h]'
         argvard.register_command('command', command)
         argvard(['application', 'command'])
 
@@ -92,7 +142,7 @@ class TestArgvard(object):
             pass
         @command.main()
         def main2(context):
-            assert context.command.get_usage(context) == 'application command [--foo]'
+            assert context.command.get_usage(context) == 'application command [--help] [-h] [--foo]'
         argvard.register_command('command', command)
         argvard(['application', 'command'])
 
@@ -101,7 +151,7 @@ class TestArgvard(object):
         command = Command()
         @command.main('foo bar')
         def main3(context, foo, bar):
-            assert context.command.get_usage(context) == 'application command <foo> <bar>'
+            assert context.command.get_usage(context) == 'application command [--help] [-h] <foo> <bar>'
         argvard.register_command('command', command)
         argvard(['application', 'command', 'foo', 'bar'])
 
@@ -233,7 +283,7 @@ class TestArgvard(object):
         @argvard.option('-b')
         def bar():
             pass
-        assert list(argvard.options.keys()) == ['-a', '-b']
+        assert list(argvard.options.keys()) == ['--help', '-h', '-a', '-b']
 
     def test_option_usage(self):
         argvard = Argvard()

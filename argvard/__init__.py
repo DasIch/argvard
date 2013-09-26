@@ -19,6 +19,8 @@
     :copyright: 2013 by Daniel Neuhäuser
     :license: Apache License 2.0, see LICENSE for more details
 """
+from __future__ import print_function
+import sys
 from functools import partial
 from collections import OrderedDict
 
@@ -34,6 +36,27 @@ class ExecutableBase(object):
         self.main_signature = None
         self.options = OrderedDict()
         self.commands = OrderedDict()
+
+        self.add_default_options()
+
+    def add_default_options(self):
+        @self.option('-h', overrideable=True)
+        @self.option('--help', overrideable=True)
+        def help(context):
+            print(u'usage: %s' %
+                (context.command or context.argvard).get_usage(context)
+            )
+            if self.options:
+                print()
+                print(u'options:')
+                for name in self.options:
+                    print(name)
+            if self.commands:
+                print()
+                print(u'commands:')
+                for name in self.commands:
+                    print(name)
+            sys.exit(1)
 
     def get_usage(self, context):
         usage = u' '.join(context.command_path)

@@ -211,7 +211,6 @@ class Signature(object):
 
     def parse(self, argv):
         rv = {}
-        argv = iter(argv)
         for name in self.arguments:
             try:
                 rv[name] = next(argv)

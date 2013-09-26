@@ -24,7 +24,7 @@ import sys
 from functools import partial
 from collections import OrderedDict
 
-from argvard.utils import is_python_identifier
+from argvard.utils import is_python_identifier, unique
 from argvard._compat import implements_iterator, iteritems, itervalues
 
 
@@ -62,7 +62,7 @@ class ExecutableBase(object):
         usage = u' '.join(context.command_path)
         if self.options:
             usage += u' ' + ' '.join(
-                u'[%s]' % option.usage for option in itervalues(self.options)
+                u'[%s]' % option.usage for option in unique(itervalues(self.options))
             )
         if self.main_signature and self.main_signature.arguments:
             usage += u' ' + self.main_signature.usage
@@ -77,31 +77,38 @@ class ExecutableBase(object):
         parts = signature.split(' ', 1)
         if not parts or not parts[0]:
             raise InvalidSignature('option name missing')
-        name = parts[0]
-        if name.startswith('--'):
-            if len(name) == 2:
-                raise InvalidSignature(
-                    'option with long prefix is missing a name'
-                )
-        elif name.startswith('-'):
-            if len(name) == 1:
-                raise InvalidSignature(
-                    'option with short prefix is missing a name'
-                )
-            elif len(name) > 2:
-                raise InvalidSignature(
-                    'short option with name longer than one character: %s' % name
-                )
-        if name in self.options and not self.options[name].overrideable:
-            raise RuntimeError('%s is already defined' % name)
+        names = parts[0]
+        if u'|' in names:
+            names = names.split(u'|')
+        else:
+            names = [names]
+        for name in names:
+            if name.startswith('--'):
+                if len(name) == 2:
+                    raise InvalidSignature(
+                        'option with long prefix is missing a name'
+                    )
+            elif name.startswith('-'):
+                if len(name) == 1:
+                    raise InvalidSignature(
+                        'option with short prefix is missing a name'
+                    )
+                elif len(name) > 2:
+                    raise InvalidSignature(
+                        'short option with name longer than one character: %s' % name
+                    )
+            if name in self.options and not self.options[name].overrideable:
+                raise RuntimeError('%s is already defined' % name)
         if parts[1:]:
             signature = Signature.from_string(parts[1])
         else:
             signature = Signature([])
         def decorator(function):
-            self.options[name] = Option(
-                name, function, signature, overrideable=overrideable
+            option = Option(
+                names, function, signature, overrideable=overrideable
             )
+            for name in names:
+                self.options[name] = option
             return function
         return decorator
 
@@ -223,15 +230,15 @@ class Argv(object):
 
 
 class Option(object):
-    def __init__(self, name, function, signature, overrideable=False):
-        self.name = name
+    def __init__(self, names, function, signature, overrideable=False):
+        self.names = names
         self.function = function
         self.signature = signature
         self.overrideable = overrideable
 
     @property
     def usage(self):
-        usage = self.name
+        usage = u'|'.join(self.names)
         if self.signature.usage:
             usage += u' ' + self.signature.usage
         return usage

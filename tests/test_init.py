@@ -292,6 +292,18 @@ class TestArgvard(object):
             pass
         assert argvard.options['-a'].usage == u'-a <foo> <bar>'
 
+    def test_option_multiple_name_definition(self):
+        called = []
+        argvard = Argvard()
+        @argvard.option('-a|--abc')
+        def option(context):
+            called.append(True)
+        @argvard.main()
+        def main(context):
+            assert context.argvard.get_usage(context) == u'application [--help] [-h] [-a|--abc]'
+        argvard(['application', '-a', '--abc'])
+        assert called == [True, True]
+
     def test_define_main_twice(self):
         argvard = Argvard()
         @argvard.main()

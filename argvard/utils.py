@@ -70,3 +70,11 @@ def _is_in_id_continue(character):
         'Nd', # decimal numbers
         'Pc' # connector punctuations
     ]) or character == u'\u00B7'
+
+
+def unique(iterable):
+    seen = set()
+    for obj in iterable:
+        if obj not in seen:
+            yield obj
+            seen.add(obj)

@@ -39,8 +39,7 @@ class TestArgvard(object):
             u'usage: application [-h|--help]\n'
             u'\n'
             u'options:\n'
-            u'-h\n'
-            u'--help\n'
+            u'-h, --help\n'
         )
 
         argvard = Argvard()
@@ -57,8 +56,7 @@ class TestArgvard(object):
             u'usage: application [-h|--help]\n'
             u'\n'
             u'options:\n'
-            u'-h\n'
-            u'--help\n'
+            u'-h, --help\n'
             u'\n'
             u'commands:\n'
             u'command\n'
@@ -73,8 +71,7 @@ class TestArgvard(object):
             u'usage: application command [-h|--help]\n'
             u'\n'
             u'options:\n'
-            u'-h\n'
-            u'--help\n'
+            u'-h, --help\n'
         )
 
     def test_get_usage(self):

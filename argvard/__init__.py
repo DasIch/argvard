@@ -48,8 +48,8 @@ class ExecutableBase(object):
             if self.options:
                 print()
                 print(u'options:')
-                for name in self.options:
-                    print(name)
+                for option in unique(itervalues(self.options)):
+                    print(u', '.join(option.names))
             if self.commands:
                 print()
                 print(u'commands:')

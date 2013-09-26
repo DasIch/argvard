@@ -67,7 +67,7 @@ class ExecutableBase(object):
             signature = Signature([])
         def decorator(function):
             self.options[name] = Option(
-                function, signature, overrideable=overrideable
+                name, function, signature, overrideable=overrideable
             )
             return function
         return decorator
@@ -183,10 +183,15 @@ class Argv(object):
 
 
 class Option(object):
-    def __init__(self, function, signature, overrideable=False):
+    def __init__(self, name, function, signature, overrideable=False):
+        self.name = name
         self.function = function
         self.signature = signature
         self.overrideable = overrideable
+
+    @property
+    def usage(self):
+        return u'%s %s' % (self.name, self.signature.usage)
 
     def call(self, context, argv):
         self.signature.call_with_arguments(
@@ -208,6 +213,10 @@ class Signature(object):
 
     def __init__(self, arguments):
         self.arguments = arguments
+
+    @property
+    def usage(self):
+        return u' '.join(u'<%s>' % name for name in self.arguments)
 
     def parse(self, argv):
         rv = {}

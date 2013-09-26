@@ -181,6 +181,13 @@ class TestArgvard(object):
             pass
         assert list(argvard.options.keys()) == ['-a', '-b']
 
+    def test_option_usage(self):
+        argvard = Argvard()
+        @argvard.option('-a foo bar')
+        def option(foo, bar):
+            pass
+        assert argvard.options['-a'].usage == u'-a <foo> <bar>'
+
     def test_define_main_twice(self):
         argvard = Argvard()
         @argvard.main()

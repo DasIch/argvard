@@ -240,6 +240,27 @@ class TestArgvard(object):
         argvard.register_command('command', command)
         argvard(['application', '-a', 'command'])
 
+    def test_context_argvard_attribute(self):
+        argvard = Argvard()
+        @argvard.main()
+        def main(context):
+            assert context.argvard is argvard
+        argvard(['application'])
+
+    def test_context_command_path_attribute(self):
+        argvard = Argvard()
+        @argvard.main()
+        def main(context):
+            assert context.command_path == ['application']
+        argvard(['application'])
+
+        command = Command()
+        @command.main()
+        def command_main(context):
+            assert context.command_path == ['application', 'command']
+        argvard.register_command('command', command)
+        argvard(['application', 'command'])
+
     def test_command_defaults(self):
         argvard = Argvard()
         @argvard.option('-a')

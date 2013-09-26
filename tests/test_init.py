@@ -268,6 +268,22 @@ class TestArgvard(object):
         argvard.register_command('command', command)
         argvard(['application', 'command'])
 
+    def test_context_command_attribute(self):
+        argvard = Argvard()
+        @argvard.main()
+        def main(context):
+            assert context.command is None
+        argvard(['application'])
+
+        argvard = Argvard()
+        argvard.main()(lambda context: None)
+        command = Command()
+        @command.main()
+        def main2(context):
+            assert context.command is command
+        argvard.register_command('command', command)
+        argvard(['application', 'command'])
+
     def test_command_defaults(self):
         argvard = Argvard()
         @argvard.option('-a')

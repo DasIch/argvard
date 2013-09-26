@@ -155,6 +155,7 @@ class Argvard(ExecutableBase):
 
 class Command(ExecutableBase):
     def update_context(self, context):
+        context.command = self
         for key, value in iteritems(self.defaults):
             context.setdefault(key, value)
 
@@ -253,3 +254,5 @@ class Context(dict):
     def __init__(self, argvard, application_name):
         self.argvard = argvard
         self.command_path = [application_name]
+
+        self.command = None

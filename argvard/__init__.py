@@ -98,6 +98,7 @@ class ExecutableBase(object):
             pass
         else:
             if argument in self.commands:
+                context.command_path.append(argument)
                 self.commands[argument](context, argv)
                 return True
             else:
@@ -137,14 +138,16 @@ class ExecutableBase(object):
 
 
 class Argvard(ExecutableBase):
-    def create_context(self):
-        return self.defaults.copy()
+    def create_context(self, argv):
+        context = Context(self, argv[0])
+        context.update(self.defaults)
+        return context
 
     def __call__(self, argv):
         if self.main_func is None:
             raise RuntimeError('main is undefined')
         argv = Argv(self.normalize_argv(argv))
-        context = self.create_context()
+        context = self.create_context(argv)
         self.call_options(context, argv)
         if not self.call_commands(context, argv):
             self.call_main(context, argv)
@@ -169,6 +172,9 @@ class Argv(object):
     def __init__(self, argv):
         self.argv = argv
         self.position = 1
+
+    def __getitem__(self, index):
+        return self.argv[index]
 
     def __iter__(self):
         return self
@@ -220,7 +226,6 @@ class Signature(object):
 
     def parse(self, argv):
         rv = {}
-        argv = iter(argv)
         for name in self.arguments:
             try:
                 rv[name] = next(argv)
@@ -242,3 +247,9 @@ class ArgumentMissing(Exception):
 
 class UnexpectedArgument(Exception):
     pass
+
+
+class Context(dict):
+    def __init__(self, argvard, application_name):
+        self.argvard = argvard
+        self.command_path = [application_name]

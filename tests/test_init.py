@@ -25,111 +25,6 @@ from argvard import Argvard, Command, InvalidSignature, ArgumentMissing
 
 
 class TestArgvard(object):
-    @pytest.mark.parametrize('help_option_name', ['-h', '--help'])
-    def test_help_option(self, capsys, help_option_name):
-        argvard = Argvard()
-        argvard.main()(lambda context: None)
-        with pytest.raises(SystemExit) as exception:
-            argvard(['application', help_option_name])
-        assert exception.value.code == 1
-        stdout, stderr = capsys.readouterr()
-        assert stderr == u''
-        assert stdout == (
-            u'usage: application [-h|--help]\n'
-            u'\n'
-            u'options:\n'
-            u'-h, --help\n'
-            u'    Show this text.\n'
-        )
-
-        argvard = Argvard()
-        @argvard.main()
-        def main():
-            """
-            A description.
-            """
-        with pytest.raises(SystemExit) as exception:
-            argvard(['application', help_option_name])
-        assert exception.value.code == 1
-        stdout, stderr = capsys.readouterr()
-        assert stderr == u''
-        assert stdout == (
-            u'usage: application [-h|--help]\n'
-            u'\n'
-            u'A description.\n'
-            u'\n'
-            u'options:\n'
-            u'-h, --help\n'
-            u'    Show this text.\n'
-        )
-
-        argvard = Argvard()
-        @argvard.option('--foo')
-        def option(context):
-            """
-            A description.
-            """
-        argvard.main()(lambda context: None)
-        with pytest.raises(SystemExit) as exception:
-            argvard(['application', help_option_name])
-        assert exception.value.code == 1
-        stdout, stderr = capsys.readouterr()
-        assert stderr == u''
-        assert stdout == (
-            u'usage: application [-h|--help] [--foo]\n'
-            u'\n'
-            u'options:\n'
-            u'-h, --help\n'
-            u'    Show this text.\n'
-            u'--foo\n'
-            u'    A description.\n'
-        )
-
-        argvard = Argvard()
-        argvard.main()(lambda context: None)
-        command = Command()
-        @command.main()
-        def main2(context):
-            """
-            Command description.
-
-            Some more information that should not always be included.
-            """
-        argvard.register_command('command', command)
-        with pytest.raises(SystemExit) as exception:
-            argvard(['application', help_option_name])
-        assert exception.value.code == 1
-        stdout, stderr = capsys.readouterr()
-        assert stderr == u''
-        assert stdout == (
-            u'usage: application [-h|--help]\n'
-            u'\n'
-            u'options:\n'
-            u'-h, --help\n'
-            u'    Show this text.\n'
-            u'\n'
-            u'commands:\n'
-            u'command\n'
-            u'    Command description.\n'
-        )
-
-        with pytest.raises(SystemExit) as exception:
-            argvard(['application', 'command', help_option_name])
-        assert exception.value.code == 1
-        stdout, stderr = capsys.readouterr()
-        assert stderr == u''
-        assert stdout == (
-            u'usage: application command [-h|--help]\n'
-            u'\n'
-            u'Command description.\n'
-            u'\n'
-            u'Some more information that should not always be included.\n'
-            u'\n'
-            u'options:\n'
-            u'-h, --help\n'
-            u'    Show this text.\n'
-        )
-
     def test_get_usage(self):
         argvard = Argvard()
         @argvard.main()
@@ -208,155 +103,6 @@ class TestArgvard(object):
         argvard.register_command('command', command)
         argvard(['application', 'command', 'foo', 'bar'])
 
-    def test_option_without_name(self):
-        argvard = Argvard()
-        with pytest.raises(InvalidSignature):
-            @argvard.option('')
-            def foo():
-                pass
-
-    @pytest.mark.parametrize('name', [
-        '--',
-        '-',
-        '-foo'
-    ])
-    def test_option_with_bad_name(self, name):
-        argvard = Argvard()
-        with pytest.raises(InvalidSignature):
-            @argvard.option(name)
-            def option():
-                pass
-
-    def test_define_option_twice(self):
-        argvard = Argvard()
-        @argvard.option('--option')
-        def foo():
-            pass
-
-        with pytest.raises(RuntimeError):
-            @argvard.option('--option')
-            def bar():
-                pass
-
-    def test_option_overrideable(self):
-        called = []
-        argvard = Argvard()
-        @argvard.option('--option', overrideable=True)
-        def foo(context):
-            called.append('foo')
-        @argvard.option('--option')
-        def bar(context):
-            called.append('bar')
-        argvard.main()(lambda context: None)
-        argvard(['application', '--option'])
-        assert called == ['bar']
-
-    def test_option(self):
-        called = []
-        argvard = Argvard()
-        @argvard.option('--option')
-        def option(context):
-            called.append(True)
-        argvard.main()(lambda context: None)
-        argvard(['application'])
-        assert called == []
-        argvard(['application', '--option'])
-        assert called == [True]
-
-    def test_option_with_signature(self):
-        called = []
-        argvard = Argvard()
-        @argvard.option('--option argument')
-        def option(context, argument):
-            called.append(argument)
-        argvard.main()(lambda context: None)
-        argvard(['application'])
-        assert called == []
-        with pytest.raises(ArgumentMissing):
-            argvard(['application', '--option'])
-        argvard(['application', '--option', 'foo'])
-        assert called == ['foo']
-
-    def test_option_short_with_concatenated_argument(self):
-        called = []
-        argvard = Argvard()
-        @argvard.option('-o argument')
-        def option(context, argument):
-            called.append(argument)
-        argvard.main()(lambda context: None)
-        argvard(['application', '-ofoo'])
-        assert called == ['foo']
-
-    def test_option_multiple_shorts(self):
-        called = []
-        argvard = Argvard()
-        @argvard.option('-a')
-        def a(context):
-            called.append('a')
-        @argvard.option('-b')
-        def b(context):
-            called.append('b')
-        argvard.main()(lambda context: None)
-        argvard(['application', '-ab'])
-        assert called == ['a', 'b']
-
-    def test_short_option_lookalike(self):
-        called = []
-        argvard = Argvard()
-        @argvard.main('argument')
-        def main(context, argument):
-            called.append(argument)
-        argvard(['application', '-foobar'])
-        assert called == ['-foobar']
-
-    def test_short_option_prefix(self):
-        called = []
-        argvard = Argvard()
-        @argvard.main('argument')
-        def main(context, argument):
-            called.append(argument)
-        argvard(['application', '-'])
-        assert called == ['-']
-
-    def test_long_option_with_concatenated_argument(self):
-        called = []
-        argvard = Argvard()
-        @argvard.option('--option argument')
-        def option(context, argument):
-            called.append(argument)
-        argvard.main()(lambda context: None)
-        argvard(['application', '--option=foobar'])
-        assert called == ['foobar']
-
-    def test_option_ordering(self):
-        argvard = Argvard()
-        @argvard.option('-a')
-        def foo():
-            pass
-        @argvard.option('-b')
-        def bar():
-            pass
-        assert list(argvard.options.keys()) == ['-h', '--help', '-a', '-b']
-
-    def test_option_usage(self):
-        argvard = Argvard()
-        @argvard.option('-a foo bar')
-        def option(foo, bar):
-            pass
-        assert argvard.options['-a'].usage == u'-a <foo> <bar>'
-
-    def test_option_multiple_name_definition(self):
-        called = []
-        argvard = Argvard()
-        @argvard.option('-a|--abc')
-        def option(context):
-            called.append(True)
-        @argvard.main()
-        def main(context):
-            assert context.argvard.get_usage(context) == u'application [-h|--help] [-a|--abc]'
-        argvard(['application', '-a', '--abc'])
-        assert called == [True, True]
-
     def test_define_main_twice(self):
         argvard = Argvard()
         @argvard.main()
@@ -401,6 +147,153 @@ class TestArgvard(object):
         argvard(['application', 'name'])
         assert called == ['name']
 
+
+class TestOption(object):
+    @pytest.mark.parametrize('name', [
+        '',
+        '--',
+        '-',
+        '-foo'
+    ])
+    def test_bad_name(self, name):
+        argvard = Argvard()
+        with pytest.raises(InvalidSignature):
+            @argvard.option(name)
+            def option():
+                pass
+
+    def test_define_twice(self):
+        argvard = Argvard()
+        @argvard.option('--option')
+        def foo():
+            pass
+
+        with pytest.raises(RuntimeError):
+            @argvard.option('--option')
+            def bar():
+                pass
+
+    def test_overrideable(self):
+        called = []
+        argvard = Argvard()
+        @argvard.option('--option', overrideable=True)
+        def foo(context):
+            called.append('foo')
+        @argvard.option('--option')
+        def bar(context):
+            called.append('bar')
+        argvard.main()(lambda context: None)
+        argvard(['application', '--option'])
+        assert called == ['bar']
+
+    def test_basic(self):
+        called = []
+        argvard = Argvard()
+        @argvard.option('--option')
+        def option(context):
+            called.append(True)
+        argvard.main()(lambda context: None)
+        argvard(['application'])
+        assert called == []
+        argvard(['application', '--option'])
+        assert called == [True]
+
+    def test_with_signature(self):
+        called = []
+        argvard = Argvard()
+        @argvard.option('--option argument')
+        def option(context, argument):
+            called.append(argument)
+        argvard.main()(lambda context: None)
+        argvard(['application'])
+        assert called == []
+        with pytest.raises(ArgumentMissing):
+            argvard(['application', '--option'])
+        argvard(['application', '--option', 'foo'])
+        assert called == ['foo']
+
+    def test_short_with_concatenated_argument(self):
+        called = []
+        argvard = Argvard()
+        @argvard.option('-o argument')
+        def option(context, argument):
+            called.append(argument)
+        argvard.main()(lambda context: None)
+        argvard(['application', '-ofoo'])
+        assert called == ['foo']
+
+    def test_multiple_shorts(self):
+        called = []
+        argvard = Argvard()
+        @argvard.option('-a')
+        def a(context):
+            called.append('a')
+        @argvard.option('-b')
+        def b(context):
+            called.append('b')
+        argvard.main()(lambda context: None)
+        argvard(['application', '-ab'])
+        assert called == ['a', 'b']
+
+    def test_option_lookalike_ignored(self):
+        called = []
+        argvard = Argvard()
+        @argvard.main('argument')
+        def main(context, argument):
+            called.append(argument)
+        argvard(['application', '-foobar'])
+        assert called == ['-foobar']
+
+    def test_standalone_short_prefix_is_preserved(self):
+        called = []
+        argvard = Argvard()
+        @argvard.main('argument')
+        def main(context, argument):
+            called.append(argument)
+        argvard(['application', '-'])
+        assert called == ['-']
+
+    def test_long_with_concatenated_argument(self):
+        called = []
+        argvard = Argvard()
+        @argvard.option('--option argument')
+        def option(context, argument):
+            called.append(argument)
+        argvard.main()(lambda context: None)
+        argvard(['application', '--option=foobar'])
+        assert called == ['foobar']
+
+    def test_ordering(self):
+        argvard = Argvard()
+        @argvard.option('-a')
+        def foo():
+            pass
+        @argvard.option('-b')
+        def bar():
+            pass
+        assert list(argvard.options.keys()) == ['-h', '--help', '-a', '-b']
+
+    def test_usage(self):
+        argvard = Argvard()
+        @argvard.option('-a foo bar')
+        def option(foo, bar):
+            pass
+        assert argvard.options['-a'].usage == u'-a <foo> <bar>'
+
+    def test_multiple_name_definition(self):
+        called = []
+        argvard = Argvard()
+        @argvard.option('-a|--abc')
+        def option(context):
+            called.append(True)
+        @argvard.main()
+        def main(context):
+            assert context.argvard.get_usage(context) == u'application [-h|--help] [-a|--abc]'
+        argvard(['application', '-a', '--abc'])
+        assert called == [True, True]
+
+
+class TestContext(object):
     def test_defaults(self):
         argvard = Argvard(defaults={'a': 1})
         @argvard.option('-a')
@@ -409,57 +302,6 @@ class TestArgvard(object):
             assert context['a'] == 1
         argvard.main()(lambda context: None)
         argvard(['application', '-a'])
-
-    def test_context_inherited_by_commands(self):
-        argvard = Argvard()
-        @argvard.option('-a')
-        def option(context):
-            context['a'] = 1
-        argvard.main()(lambda context: None)
-        command = Command()
-        @command.main()
-        def main(context):
-            assert 'a' in context
-            assert context['a'] == 1
-        argvard.register_command('command', command)
-        argvard(['application', '-a', 'command'])
-
-    def test_context_argvard_attribute(self):
-        argvard = Argvard()
-        @argvard.main()
-        def main(context):
-            assert context.argvard is argvard
-        argvard(['application'])
-
-    def test_context_command_path_attribute(self):
-        argvard = Argvard()
-        @argvard.main()
-        def main(context):
-            assert context.command_path == ['application']
-        argvard(['application'])
-
-        command = Command()
-        @command.main()
-        def command_main(context):
-            assert context.command_path == ['application', 'command']
-        argvard.register_command('command', command)
-        argvard(['application', 'command'])
-
-    def test_context_command_attribute(self):
-        argvard = Argvard()
-        @argvard.main()
-        def main(context):
-            assert context.command is None
-        argvard(['application'])
-
-        argvard = Argvard()
-        argvard.main()(lambda context: None)
-        command = Command()
-        @command.main()
-        def main2(context):
-            assert context.command is command
-        argvard.register_command('command', command)
-        argvard(['application', 'command'])
 
     def test_command_defaults(self):
         argvard = Argvard()
@@ -490,3 +332,172 @@ class TestArgvard(object):
             assert context['a'] == 1
         argvard.register_command('command', command)
         argvard(['application', '-a', 'command'])
+
+    def test_inherited_by_commands(self):
+        argvard = Argvard()
+        @argvard.option('-a')
+        def option(context):
+            context['a'] = 1
+        argvard.main()(lambda context: None)
+        command = Command()
+        @command.main()
+        def main(context):
+            assert 'a' in context
+            assert context['a'] == 1
+        argvard.register_command('command', command)
+        argvard(['application', '-a', 'command'])
+
+    def test_argvard_attribute(self):
+        argvard = Argvard()
+        @argvard.main()
+        def main(context):
+            assert context.argvard is argvard
+        argvard(['application'])
+
+    def test_command_path_attribute(self):
+        argvard = Argvard()
+        @argvard.main()
+        def main(context):
+            assert context.command_path == ['application']
+        argvard(['application'])
+
+        command = Command()
+        @command.main()
+        def command_main(context):
+            assert context.command_path == ['application', 'command']
+        argvard.register_command('command', command)
+        argvard(['application', 'command'])
+
+    def test_command_attribute(self):
+        argvard = Argvard()
+        @argvard.main()
+        def main(context):
+            assert context.command is None
+        argvard(['application'])
+
+        argvard = Argvard()
+        argvard.main()(lambda context: None)
+        command = Command()
+        @command.main()
+        def main2(context):
+            assert context.command is command
+        argvard.register_command('command', command)
+        argvard(['application', 'command'])
+
+
+class TestHelpOption(object):
+    @pytest.fixture(params=['-h', '--help'])
+    def name(self, request):
+        return request.param
+
+    def test_application(self, capsys, name):
+        argvard = Argvard()
+        argvard.main()(lambda context: None)
+        with pytest.raises(SystemExit) as exception:
+            argvard(['application', name])
+        assert exception.value.code == 1
+        stdout, stderr = capsys.readouterr()
+        assert stderr == u''
+        assert stdout == (
+            u'usage: application [-h|--help]\n'
+            u'\n'
+            u'options:\n'
+            u'-h, --help\n'
+            u'    Show this text.\n'
+        )
+
+    def test_application_description(self, capsys, name):
+        argvard = Argvard()
+        @argvard.main()
+        def main():
+            """
+            A description.
+            """
+        with pytest.raises(SystemExit) as exception:
+            argvard(['application', name])
+        assert exception.value.code == 1
+        stdout, stderr = capsys.readouterr()
+        assert stderr == u''
+        assert stdout == (
+            u'usage: application [-h|--help]\n'
+            u'\n'
+            u'A description.\n'
+            u'\n'
+            u'options:\n'
+            u'-h, --help\n'
+            u'    Show this text.\n'
+        )
+
+    def test_option_description(self, capsys, name):
+        argvard = Argvard()
+        @argvard.option('--foo')
+        def option(context):
+            """
+            A description.
+            """
+        argvard.main()(lambda context: None)
+        with pytest.raises(SystemExit) as exception:
+            argvard(['application', name])
+        assert exception.value.code == 1
+        stdout, stderr = capsys.readouterr()
+        assert stderr == u''
+        assert stdout == (
+            u'usage: application [-h|--help] [--foo]\n'
+            u'\n'
+            u'options:\n'
+            u'-h, --help\n'
+            u'    Show this text.\n'
+            u'--foo\n'
+            u'    A description.\n'
+        )
+
+    def test_command(self, capsys, name):
+        argvard = Argvard()
+        argvard.main()(lambda context: None)
+        command = Command()
+        @command.main()
+        def main(context):
+            pass
+        argvard.register_command('command', command)
+        with pytest.raises(SystemExit) as exception:
+            argvard(['application', 'command', name])
+        assert exception.value.code == 1
+        stdout, stderr = capsys.readouterr()
+        assert stderr == u''
+        assert stdout == (
+            u'usage: application command [-h|--help]\n'
+            u'\n'
+            u'options:\n'
+            u'-h, --help\n'
+            u'    Show this text.\n'
+        )
+
+
+    def test_command_description(self, capsys, name):
+        argvard = Argvard()
+        argvard.main()(lambda context: None)
+        command = Command()
+        @command.main()
+        def main(context):
+            """
+            Command description.
+
+            Some more information that should not always be included.
+            """
+        argvard.register_command('command', command)
+        with pytest.raises(SystemExit) as exception:
+            argvard(['application', 'command', name])
+        assert exception.value.code == 1
+        stdout, stderr = capsys.readouterr()
+        assert stderr == u''
+        assert stdout == (
+            u'usage: application command [-h|--help]\n'
+            u'\n'
+            u'Command description.\n'
+            u'\n'
+            u'Some more information that should not always be included.\n'
+            u'\n'
+            u'options:\n'
+            u'-h, --help\n'
+            u'    Show this text.\n'
+        )

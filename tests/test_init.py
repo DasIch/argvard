@@ -21,9 +21,7 @@
 """
 import pytest
 
-from argvard import (
-    Argvard, Command, InvalidSignature, ArgumentMissing, UnexpectedArgument
-)
+from argvard import Argvard, Command, InvalidSignature, ArgumentMissing
 
 
 class TestArgvard(object):
@@ -375,7 +373,7 @@ class TestArgvard(object):
         with pytest.raises(RuntimeError):
             argvard(['application'])
 
-    def test_main(self):
+    def test_main(self, capsys):
         called = []
         argvard = Argvard()
         @argvard.main()
@@ -383,8 +381,16 @@ class TestArgvard(object):
             called.append(True)
         argvard(['application'])
         assert called == [True]
-        with pytest.raises(UnexpectedArgument):
+
+        with pytest.raises(SystemExit) as exception:
             argvard(['application', 'unexpected'])
+        assert exception.value.code == 1
+        stdout, stderr = capsys.readouterr()
+        assert stdout == u''
+        assert stderr == (
+            u'error: unexpected argument "unexpected"\n'
+            u'usage: application [-h|--help]\n'
+        )
 
     def test_main_with_signature(self):
         called = []

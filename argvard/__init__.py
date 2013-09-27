@@ -167,7 +167,7 @@ class ExecutableBase(object):
         arguments = self.main_signature.parse(argv)
         remaining = list(argv)
         if remaining:
-            raise UnexpectedArgument(remaining[0])
+            raise UnexpectedArgument('unexpected argument "%s"' % remaining[0])
         self.main_func(context, **arguments)
 
     def normalize_argv(self, argv):
@@ -207,8 +207,13 @@ class Argvard(ExecutableBase):
         argv = Argv(self.normalize_argv(argv))
         context = self.create_context(argv)
         self.call_options(context, argv)
-        if not self.call_commands(context, argv):
-            self.call_main(context, argv)
+        try:
+            if not self.call_commands(context, argv):
+                self.call_main(context, argv)
+        except UsageError as error:
+            print(u'error: %s' % error.args[0], file=sys.stderr)
+            print(u'usage: %s' % (context.command or context.argvard).get_usage(context), file=sys.stderr)
+            sys.exit(1)
 
 
 class Command(ExecutableBase):

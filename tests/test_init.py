@@ -27,11 +27,12 @@ from argvard import (
 
 
 class TestArgvard(object):
-    def test_help_option(self, capsys):
+    @pytest.mark.parametrize('help_option_name', ['-h', '--help'])
+    def test_help_option(self, capsys, help_option_name):
         argvard = Argvard()
         argvard.main()(lambda context: None)
         with pytest.raises(SystemExit) as exception:
-            argvard(['application', '-h'])
+            argvard(['application', help_option_name])
         assert exception.value.code == 1
         stdout, stderr = capsys.readouterr()
         assert stderr == u''
@@ -50,7 +51,7 @@ class TestArgvard(object):
             A description.
             """
         with pytest.raises(SystemExit) as exception:
-            argvard(['application', '-h'])
+            argvard(['application', help_option_name])
         assert exception.value.code == 1
         stdout, stderr = capsys.readouterr()
         assert stderr == u''
@@ -72,7 +73,7 @@ class TestArgvard(object):
             """
         argvard.main()(lambda context: None)
         with pytest.raises(SystemExit) as exception:
-            argvard(['application', '-h'])
+            argvard(['application', help_option_name])
         assert exception.value.code == 1
         stdout, stderr = capsys.readouterr()
         assert stderr == u''
@@ -98,7 +99,7 @@ class TestArgvard(object):
             """
         argvard.register_command('command', command)
         with pytest.raises(SystemExit) as exception:
-            argvard(['application', '-h'])
+            argvard(['application', help_option_name])
         assert exception.value.code == 1
         stdout, stderr = capsys.readouterr()
         assert stderr == u''
@@ -115,7 +116,7 @@ class TestArgvard(object):
         )
 
         with pytest.raises(SystemExit) as exception:
-            argvard(['application', 'command', '-h'])
+            argvard(['application', 'command', help_option_name])
         assert exception.value.code == 1
         stdout, stderr = capsys.readouterr()
         assert stderr == u''

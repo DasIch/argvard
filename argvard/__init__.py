@@ -37,6 +37,7 @@ class ExecutableBase(object):
         self.main_signature = None
         self.options = OrderedDict()
         self.commands = OrderedDict()
+        self.description = None
 
         self.add_default_options()
 
@@ -49,6 +50,9 @@ class ExecutableBase(object):
             print(u'usage: %s' %
                 (context.command or context.argvard).get_usage(context)
             )
+            if self.description:
+                print()
+                print(self.description)
             if self.options:
                 print()
                 print(u'options:')
@@ -64,8 +68,10 @@ class ExecutableBase(object):
             if self.commands:
                 print()
                 print(u'commands:')
-                for name in self.commands:
+                for name, command in iteritems(self.commands):
                     print(name)
+                    if command.description:
+                        print(u' ' * 4 + command.description.splitlines()[0])
             sys.exit(1)
 
     def get_usage(self, context):
@@ -129,6 +135,8 @@ class ExecutableBase(object):
                 raise RuntimeError('main is already defined')
             self.main_func = function
             self.main_signature = signature
+            if function.__doc__:
+                self.description = textwrap.dedent(function.__doc__).strip()
             return function
         return decorator
 

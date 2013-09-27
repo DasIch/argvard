@@ -44,6 +44,27 @@ class TestArgvard(object):
         )
 
         argvard = Argvard()
+        @argvard.main()
+        def main():
+            """
+            A description.
+            """
+        with pytest.raises(SystemExit) as exception:
+            argvard(['application', '-h'])
+        assert exception.value.code == 1
+        stdout, stderr = capsys.readouterr()
+        assert stderr == u''
+        assert stdout == (
+            u'usage: application [-h|--help]\n'
+            u'\n'
+            u'A description.\n'
+            u'\n'
+            u'options:\n'
+            u'-h, --help\n'
+            u'    Show this text.\n'
+        )
+
+        argvard = Argvard()
         @argvard.option('--foo')
         def option(context):
             """
@@ -68,7 +89,13 @@ class TestArgvard(object):
         argvard = Argvard()
         argvard.main()(lambda context: None)
         command = Command()
-        command.main()(lambda context: None)
+        @command.main()
+        def main2(context):
+            """
+            Command description.
+
+            Some more information that should not always be included.
+            """
         argvard.register_command('command', command)
         with pytest.raises(SystemExit) as exception:
             argvard(['application', '-h'])
@@ -84,6 +111,7 @@ class TestArgvard(object):
             u'\n'
             u'commands:\n'
             u'command\n'
+            u'    Command description.\n'
         )
 
         with pytest.raises(SystemExit) as exception:
@@ -93,6 +121,10 @@ class TestArgvard(object):
         assert stderr == u''
         assert stdout == (
             u'usage: application command [-h|--help]\n'
+            u'\n'
+            u'Command description.\n'
+            u'\n'
+            u'Some more information that should not always be included.\n'
             u'\n'
             u'options:\n'
             u'-h, --help\n'

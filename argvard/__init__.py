@@ -307,11 +307,15 @@ class InvalidSignature(Exception):
     pass
 
 
-class ArgumentMissing(Exception):
+class UsageError(Exception):
     pass
 
 
-class UnexpectedArgument(Exception):
+class ArgumentMissing(UsageError):
+    pass
+
+
+class UnexpectedArgument(UsageError):
     pass
 
 

@@ -40,6 +40,29 @@ class TestArgvard(object):
             u'\n'
             u'options:\n'
             u'-h, --help\n'
+            u'    Show this text.\n'
+        )
+
+        argvard = Argvard()
+        @argvard.option('--foo')
+        def option(context):
+            """
+            A description.
+            """
+        argvard.main()(lambda context: None)
+        with pytest.raises(SystemExit) as exception:
+            argvard(['application', '-h'])
+        assert exception.value.code == 1
+        stdout, stderr = capsys.readouterr()
+        assert stderr == u''
+        assert stdout == (
+            u'usage: application [-h|--help] [--foo]\n'
+            u'\n'
+            u'options:\n'
+            u'-h, --help\n'
+            u'    Show this text.\n'
+            u'--foo\n'
+            u'    A description.\n'
         )
 
         argvard = Argvard()
@@ -57,6 +80,7 @@ class TestArgvard(object):
             u'\n'
             u'options:\n'
             u'-h, --help\n'
+            u'    Show this text.\n'
             u'\n'
             u'commands:\n'
             u'command\n'
@@ -72,6 +96,7 @@ class TestArgvard(object):
             u'\n'
             u'options:\n'
             u'-h, --help\n'
+            u'    Show this text.\n'
         )
 
     def test_get_usage(self):

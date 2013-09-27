@@ -21,6 +21,7 @@
 """
 from __future__ import print_function
 import sys
+import textwrap
 from functools import partial
 from collections import OrderedDict
 
@@ -42,6 +43,9 @@ class ExecutableBase(object):
     def add_default_options(self):
         @self.option('-h|--help', overrideable=True)
         def help(context):
+            """
+            Show this text.
+            """
             print(u'usage: %s' %
                 (context.command or context.argvard).get_usage(context)
             )
@@ -50,6 +54,13 @@ class ExecutableBase(object):
                 print(u'options:')
                 for option in unique(itervalues(self.options)):
                     print(u', '.join(option.names))
+                    if option.description:
+                        print(
+                            u''.join(
+                                u' ' * 4 + line
+                                for line in option.description.splitlines(True)
+                            )
+                        )
             if self.commands:
                 print()
                 print(u'commands:')
@@ -232,6 +243,10 @@ class Option(object):
     def __init__(self, names, function, signature, overrideable=False):
         self.names = names
         self.function = function
+        if self.function.__doc__ is None:
+            self.description = None
+        else:
+            self.description = textwrap.dedent(self.function.__doc__.strip())
         self.signature = signature
         self.overrideable = overrideable
 

@@ -21,7 +21,8 @@
 """
 import pytest
 
-from argvard import Argvard, Command, InvalidSignature, ArgumentMissing
+from argvard import Argvard, Command
+from argvard.exceptions import InvalidSignature, ArgumentMissing
 
 
 class TestArgvard(object):

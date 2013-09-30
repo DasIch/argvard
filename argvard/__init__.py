@@ -25,10 +25,9 @@ import textwrap
 from functools import partial
 from collections import OrderedDict
 
-from argvard.utils import is_python_identifier, unique
-from argvard.exceptions import (
-    UnexpectedArgument, UsageError, InvalidSignature, ArgumentMissing
-)
+from argvard.utils import unique
+from argvard.signature import Signature
+from argvard.exceptions import UnexpectedArgument, UsageError, InvalidSignature
 from argvard._compat import implements_iterator, iteritems, itervalues
 
 
@@ -281,38 +280,6 @@ class Option(object):
         self.signature.call_with_arguments(
             partial(self.function, context), argv
         )
-
-
-class Signature(object):
-    @classmethod
-    def from_string(cls, string):
-        arguments = []
-        for name in string.split(' ') if string else []:
-            if not is_python_identifier(name):
-                raise InvalidSignature(
-                    'not a valid python identifier: %r' % name
-                )
-            arguments.append(name)
-        return cls(arguments)
-
-    def __init__(self, arguments):
-        self.arguments = arguments
-
-    @property
-    def usage(self):
-        return u' '.join(u'<%s>' % name for name in self.arguments)
-
-    def parse(self, argv):
-        rv = {}
-        for name in self.arguments:
-            try:
-                rv[name] = next(argv)
-            except StopIteration:
-                raise ArgumentMissing('%s is missing' % name)
-        return rv
-
-    def call_with_arguments(self, callable, argv):
-        return callable(**self.parse(argv))
 
 
 class Context(dict):

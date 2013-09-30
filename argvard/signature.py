@@ -26,20 +26,17 @@ from argvard.exceptions import InvalidSignature, ArgumentMissing
 class Signature(object):
     @classmethod
     def from_string(cls, string, allow_repetitions=False):
-        patterns = []
-        for name in string.split(' ') if string else []:
-            if name.endswith('...') and is_python_identifier(name[:-3]):
+        def parse_word(word):
+            if word.endswith('...') and is_python_identifier(word[:-3]):
                 if allow_repetitions:
-                    patterns.append(Repetition(Argument(name[:-3])))
-                else:
-                    raise InvalidSignature('repetitions are not allowed: %s' % name)
-
-            elif is_python_identifier(name):
-                patterns.append(Argument(name))
-            else:
-                raise InvalidSignature(
-                    'not a valid python identifier: %r' % name
-                )
+                    return Repetition(Argument(word[:-3]))
+                raise InvalidSignature('repetitions are not allowed: %s' % word)
+            elif is_python_identifier(word):
+                return Argument(word)
+            raise InvalidSignature('not a valid python identifier: %r' % word)
+        patterns = []
+        for word in string.split(' ') if string else []:
+            patterns.append(parse_word(word))
         return cls(patterns)
 
     def __init__(self, patterns):

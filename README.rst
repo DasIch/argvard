@@ -11,14 +11,13 @@ be simple and intuitive to use without being constraining.
 
 ::
 
-    import sys
     from argvard import Argvard
 
-
     application = Argvard()
+
     @application.main('name')
     def main(context, name):
         print(u'Hello, %s!' % name)
 
     if __name__ == '__main__':
-        application(sys.argv)
+        application()

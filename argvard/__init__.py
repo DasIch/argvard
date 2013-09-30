@@ -89,42 +89,15 @@ class ExecutableBase(object):
             raise RuntimeError('%s is already defined' % name)
         self.commands[name] = command
 
-    def option(self, signature, overrideable=False):
-        parts = signature.split(' ', 1)
-        if not parts or not parts[0]:
-            raise InvalidSignature('option name missing')
-        names = parts[0]
-        if u'|' in names:
-            names = names.split(u'|')
-        else:
-            names = [names]
-        for name in names:
-            if name.startswith('--'):
-                if len(name) == 2:
-                    raise InvalidSignature(
-                        'option with long prefix is missing a name'
-                    )
-            elif name.startswith('-'):
-                if len(name) == 1:
-                    raise InvalidSignature(
-                        'option with short prefix is missing a name'
-                    )
-                elif len(name) > 2:
-                    raise InvalidSignature(
-                        'short option with name longer than one character: %s' % name
-                    )
-            if name in self.options and not self.options[name].overrideable:
-                raise RuntimeError('%s is already defined' % name)
-        if parts[1:]:
-            signature = Signature.from_string(parts[1])
-        else:
-            signature = Signature([])
+    def option(self, string, overrideable=False):
         def decorator(function):
-            option = Option(
-                names, function, signature, overrideable=overrideable
+            option = Option.from_string(
+                string, function, overrideable=overrideable
             )
-            for name in names:
-                self.options[name] = option
+            for name in option.names:
+                if name in self.options and not self.options[name].overrideable:
+                    raise RuntimeError('%s is already defined' % name)
+            self.options.update((name, option) for name in option.names)
             return function
         return decorator
 
@@ -253,6 +226,37 @@ class Argv(object):
 
 
 class Option(object):
+    @classmethod
+    def from_string(cls, string, function, overrideable=False):
+        parts = string.split(' ', 1)
+        if not parts or not parts[0]:
+            raise InvalidSignature('option name missing')
+        names = parts[0]
+        if u'|' in names:
+            names = names.split(u'|')
+        else:
+            names = [names]
+        for name in names:
+            if name.startswith('--'):
+                if len(name) == 2:
+                    raise InvalidSignature(
+                        'option with long prefix is missing a name'
+                    )
+            elif name.startswith('-'):
+                if len(name) == 1:
+                    raise InvalidSignature(
+                        'option with short prefix is missing a name'
+                    )
+                elif len(name) > 2:
+                    raise InvalidSignature(
+                        'short option with name longer than one character: %s' % name
+                    )
+        if parts[1:]:
+            signature = Signature.from_string(parts[1])
+        else:
+            signature = Signature([])
+        return cls(names, function, signature, overrideable=overrideable)
+
     def __init__(self, names, function, signature, overrideable=False):
         self.names = names
         self.function = function

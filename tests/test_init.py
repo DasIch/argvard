@@ -156,7 +156,46 @@ class TestArgvard(object):
         argvard(['application', 'foo', 'bar', 'baz'])
         assert called == [['foo', 'bar', 'baz']]
 
+        called = []
+        argvard = Argvard()
+        @argvard.main('[foo]')
+        def main3(context, foo='default'):
+            called.append(foo)
+        argvard(['application'])
+        assert called == ['default']
+        del called[:]
+        argvard(['application', 'argument'])
+        assert called == ['argument']
 
+        called = []
+        argvard = Argvard()
+        @argvard.main('[foo [bar]]')
+        def main4(context, foo='foo', bar='bar'):
+            called.extend([foo, bar])
+        argvard(['application'])
+        assert called == ['foo', 'bar']
+        del called[:]
+        argvard(['application', 'spam'])
+        assert called == ['spam', 'bar']
+        del called[:]
+        argvard(['application', 'spam', 'eggs'])
+        assert called == ['spam', 'eggs']
+
+        called = []
+        argvard = Argvard()
+        @argvard.main('[foo...]')
+        def main5(context, foo=None):
+            if foo is None:
+                foo = []
+            called.append(foo)
+        argvard(['application'])
+        assert called == [[]]
+        del called[:]
+        argvard(['application', 'argument'])
+        assert called == [['argument']]
+        del called[:]
+        argvard(['application', 'spam', 'eggs'])
+        assert called == [['spam', 'eggs']]
 
 class TestOption(object):
     @pytest.mark.parametrize('name', [
@@ -226,6 +265,13 @@ class TestOption(object):
         argvard = Argvard()
         with pytest.raises(InvalidSignature):
             @argvard.option('--foo argument...')
+            def option(context):
+                pass
+
+    def test_optional_in_signature(self):
+        argvard = Argvard()
+        with pytest.raises(InvalidSignature):
+            @argvard.option('--foo [argument]')
             def option(context):
                 pass
 

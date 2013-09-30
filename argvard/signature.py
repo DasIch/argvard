@@ -62,33 +62,61 @@ def _parse_signature(signature, option=True):
         tokens = _tokenize(signature)
     state = 0, list(tokens)
     patterns = []
-    _parse_words(state, patterns)
-#    assert state[0] == len(state[1])
+    state = _parse_words(state, patterns)
+    assert state[0] == len(state[1])
     return patterns
 
 
 def _parse_words(state, patterns):
     position, tokens = state
     while position < len(tokens):
+        if tokens[position][0] == ']':
+            break
         position, tokens = _parse_word((position, tokens), patterns)
-        if position < len(tokens):
-            assert tokens[position][0] == 'space'
-        position += 1
+        if position < len(tokens) and tokens[position][0] == ']':
+            break
     return position, tokens
 
 
 def _parse_word(state, patterns):
-    return _either(state, patterns, [_parse_repetition, _parse_argument])
+    position, tokens = _either(state, patterns, [
+        _parse_optional, _parse_repetition, _parse_argument
+    ])
+    if position < len(tokens):
+        if tokens[position][0] == 'space':
+            position += 1
+        elif tokens[position][0] != ']':
+            raise InvalidSignature()
+    return position, tokens
+
+
+def _parse_optional(state, patterns):
+    position, tokens = state
+    if tokens[position][0] != '[':
+        raise InvalidSignature('expected [, got %r' % (tokens[position], ))
+    position += 1
+    rv = []
+    position, tokens = _parse_word((position, tokens), rv)
+    position, tokens = _parse_words((position, tokens), rv)
+    if tokens[position][0] != ']':
+        raise InvalidSignature('expected ], got %r' % (tokens[position], ))
+    position += 1
+    patterns.append(Optional(rv))
+    return position, tokens
 
 
 def _parse_repetition(state, patterns):
     position, tokens = state
     if position + 1 >= len(tokens):
-        raise InvalidSignature()
+        raise InvalidSignature('expected at least one more token')
     if tokens[position + 1][0] != 'repetition':
-        raise InvalidSignature()
+        raise InvalidSignature(
+            'expected repetition as next token, got %r' % (tokens[position + 1], )
+        )
     if tokens[position][0] != 'identifier':
-        raise InvalidSignature()
+        raise InvalidSignature(
+            'expected identifier, got %r' % (tokens[position], )
+        )
     patterns.append(Repetition(Argument(tokens[position][1])))
     return position + 2, tokens
 
@@ -99,7 +127,7 @@ def _parse_argument(state, patterns):
     if type == 'identifier':
         patterns.append(Argument(lexeme))
         return position + 1, tokens
-    raise InvalidSignature()
+    raise InvalidSignature('expected identifier, got: %r' % ((type, lexeme), ))
 
 
 def _either(state, patterns, parsers):
@@ -165,3 +193,23 @@ class Repetition(object):
             self.pattern.apply(result, iter([remaining]))
         else:
             raise ArgumentMissing('%s is missing' % self.usage)
+
+
+class Optional(object):
+    def __init__(self, patterns):
+        self.patterns = patterns
+
+    @property
+    def usage(self):
+        return u'[%s]' % u' '.join(pattern.usage for pattern in self.patterns)
+
+    def apply(self, result, argv):
+        transaction = {}
+        position = argv.position
+        try:
+            for pattern in self.patterns:
+                pattern.apply(transaction, argv)
+        except ArgumentMissing:
+            argv.position = position
+        else:
+            result.update(transaction)

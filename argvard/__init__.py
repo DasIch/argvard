@@ -26,6 +26,9 @@ from functools import partial
 from collections import OrderedDict
 
 from argvard.utils import is_python_identifier, unique
+from argvard.exceptions import (
+    UnexpectedArgument, UsageError, InvalidSignature, ArgumentMissing
+)
 from argvard._compat import implements_iterator, iteritems, itervalues
 
 
@@ -310,22 +313,6 @@ class Signature(object):
 
     def call_with_arguments(self, callable, argv):
         return callable(**self.parse(argv))
-
-
-class InvalidSignature(Exception):
-    pass
-
-
-class UsageError(Exception):
-    pass
-
-
-class ArgumentMissing(UsageError):
-    pass
-
-
-class UnexpectedArgument(UsageError):
-    pass
 
 
 class Context(dict):

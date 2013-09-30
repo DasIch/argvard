@@ -19,6 +19,9 @@
     :copyright: 2013 by Daniel Neuhäuser
     :license: Apache License 2.0, see LICENSE for more details
 """
+import os
+import subprocess
+
 import pytest
 
 from argvard import Argvard, Command
@@ -196,6 +199,19 @@ class TestArgvard(object):
         del called[:]
         argvard(['application', 'spam', 'eggs'])
         assert called == [['spam', 'eggs']]
+
+    def test_main_without_argv(self):
+        process = subprocess.Popen(
+            [
+                'python', os.path.join(os.path.dirname(__file__), 'echo.py'),
+                'foo', 'bar', 'baz'
+            ],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE
+        )
+        stdout, stderr = process.communicate()
+        assert stdout == b'foo\nbar\nbaz\n'
+        assert stderr == b''
 
 class TestOption(object):
     @pytest.mark.parametrize('name', [

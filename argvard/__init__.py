@@ -180,7 +180,9 @@ class Argvard(ExecutableBase):
         context.update(self.defaults)
         return context
 
-    def __call__(self, argv):
+    def __call__(self, argv=None):
+        if argv is None:
+            argv = sys.argv
         if self.main_func is None:
             raise RuntimeError('main is undefined')
         argv = Argv(self.normalize_argv(argv))

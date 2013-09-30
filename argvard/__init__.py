@@ -82,7 +82,7 @@ class ExecutableBase(object):
             usage += u' ' + ' '.join(
                 u'[%s]' % option.usage for option in unique(itervalues(self.options))
             )
-        if self.main_signature and self.main_signature.arguments:
+        if self.main_signature and self.main_signature.usage:
             usage += u' ' + self.main_signature.usage
         return usage
 

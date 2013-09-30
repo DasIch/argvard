@@ -26,30 +26,42 @@ from argvard.exceptions import InvalidSignature, ArgumentMissing
 class Signature(object):
     @classmethod
     def from_string(cls, string):
-        arguments = []
+        patterns = []
         for name in string.split(' ') if string else []:
             if not is_python_identifier(name):
                 raise InvalidSignature(
                     'not a valid python identifier: %r' % name
                 )
-            arguments.append(name)
-        return cls(arguments)
+            patterns.append(Argument(name))
+        return cls(patterns)
 
-    def __init__(self, arguments):
-        self.arguments = arguments
+    def __init__(self, patterns):
+        self.patterns = patterns
 
     @property
     def usage(self):
-        return u' '.join(u'<%s>' % name for name in self.arguments)
+        return u' '.join(u'<%s>' % pattern.usage for pattern in self.patterns)
 
     def parse(self, argv):
         rv = {}
-        for name in self.arguments:
-            try:
-                rv[name] = next(argv)
-            except StopIteration:
-                raise ArgumentMissing('%s is missing' % name)
+        for pattern in self.patterns:
+            pattern.apply(rv, argv)
         return rv
 
     def call_with_arguments(self, callable, argv):
         return callable(**self.parse(argv))
+
+
+class Argument(object):
+    def __init__(self, name):
+        self.name = name
+
+    @property
+    def usage(self):
+        return self.name
+
+    def apply(self, result, argv):
+        try:
+            result[self.name] = next(argv)
+        except StopIteration:
+            raise ArgumentMissing('%s is missing' % self.name)

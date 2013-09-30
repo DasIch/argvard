@@ -148,6 +148,15 @@ class TestArgvard(object):
         argvard(['application', 'name'])
         assert called == ['name']
 
+        called = []
+        argvard = Argvard()
+        @argvard.main('arguments...')
+        def main2(context, arguments):
+            called.append(arguments)
+        argvard(['application', 'foo', 'bar', 'baz'])
+        assert called == [['foo', 'bar', 'baz']]
+
+
 
 class TestOption(object):
     @pytest.mark.parametrize('name', [
@@ -212,6 +221,13 @@ class TestOption(object):
             argvard(['application', '--option'])
         argvard(['application', '--option', 'foo'])
         assert called == ['foo']
+
+    def test_repetitions_in_signature(self):
+        argvard = Argvard()
+        with pytest.raises(InvalidSignature):
+            @argvard.option('--foo argument...')
+            def option(context):
+                pass
 
     def test_short_with_concatenated_argument(self):
         called = []

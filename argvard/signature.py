@@ -25,14 +25,21 @@ from argvard.exceptions import InvalidSignature, ArgumentMissing
 
 class Signature(object):
     @classmethod
-    def from_string(cls, string):
+    def from_string(cls, string, allow_repetitions=False):
         patterns = []
         for name in string.split(' ') if string else []:
-            if not is_python_identifier(name):
+            if name.endswith('...') and is_python_identifier(name[:-3]):
+                if allow_repetitions:
+                    patterns.append(Repetition(Argument(name[:-3])))
+                else:
+                    raise InvalidSignature('repetitions are not allowed: %s' % name)
+
+            elif is_python_identifier(name):
+                patterns.append(Argument(name))
+            else:
                 raise InvalidSignature(
                     'not a valid python identifier: %r' % name
                 )
-            patterns.append(Argument(name))
         return cls(patterns)
 
     def __init__(self, patterns):
@@ -64,4 +71,20 @@ class Argument(object):
         try:
             result[self.name] = next(argv)
         except StopIteration:
-            raise ArgumentMissing('%s is missing' % self.name)
+            raise ArgumentMissing('%s is missing' % self.usage)
+
+
+class Repetition(object):
+    def __init__(self, pattern):
+        self.pattern = pattern
+
+    @property
+    def usage(self):
+        return self.pattern.usage + u'...'
+
+    def apply(self, result, argv):
+        remaining = list(argv)
+        if remaining:
+            self.pattern.apply(result, iter([remaining]))
+        else:
+            raise ArgumentMissing('%s is missing' % self.usage)

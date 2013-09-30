@@ -2,13 +2,15 @@
 import os
 from setuptools import setup
 
+from argvard import __version__
+
 
 PROJECT_DIR = os.path.abspath(os.path.dirname(__file__))
 
 
 setup(
     name='Argvard',
-    version='0.1.0-dev',
+    version=__version__,
     url='https://github.com/DasIch/argvard',
     author='Daniel Neuhäuser',
     author_email='ich@danielneuhaeuser.de',

@@ -31,6 +31,10 @@ from argvard.exceptions import UnexpectedArgument, UsageError, InvalidSignature
 from argvard._compat import implements_iterator, iteritems, itervalues
 
 
+__version__ = '0.1.0-dev'
+__version_info__ = (0, 1, 0)
+
+
 class ExecutableBase(object):
     def __init__(self, defaults=None):
         self.defaults = {} if defaults is None else defaults

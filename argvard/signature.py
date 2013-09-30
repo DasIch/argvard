@@ -19,25 +19,105 @@
     :copyright: 2013 by Daniel Neuhäuser
     :license: Apache License 2.0, see LICENSE for more details
 """
-from argvard.utils import is_python_identifier
+import re
+
 from argvard.exceptions import InvalidSignature, ArgumentMissing
+
+
+_TOKENS = [
+    ('identifier',  r'[a-zA-Z_][a-zA-Z_0-9]*'),
+    ('repetition', r'\.\.\.'),
+    ('[', r'\['),
+    (']', r'\]'),
+    ('space', r' +')
+]
+_OPTION_TOKENS = [
+    (name, regex) for name, regex in _TOKENS
+    if name not in ['repetition', '[', ']']
+]
+
+
+def _build_tokenizer(tokens):
+    regex = re.compile('|'.join('(%s)' % regex for name, regex in tokens))
+    def _tokenize(string):
+        position = 0
+        while position < len(string):
+            match = regex.match(string, position)
+            if match:
+                position = match.end()
+                yield tokens[match.lastindex - 1][0], match.group()
+            else:
+                raise InvalidSignature(string, position)
+    return _tokenize
+
+
+_tokenize = _build_tokenizer(_TOKENS)
+_option_tokenize = _build_tokenizer(_OPTION_TOKENS)
+
+
+def _parse_signature(signature, option=True):
+    if option:
+        tokens = _option_tokenize(signature)
+    else:
+        tokens = _tokenize(signature)
+    state = 0, list(tokens)
+    patterns = []
+    _parse_words(state, patterns)
+#    assert state[0] == len(state[1])
+    return patterns
+
+
+def _parse_words(state, patterns):
+    position, tokens = state
+    while position < len(tokens):
+        position, tokens = _parse_word((position, tokens), patterns)
+        if position < len(tokens):
+            assert tokens[position][0] == 'space'
+        position += 1
+    return position, tokens
+
+
+def _parse_word(state, patterns):
+    return _either(state, patterns, [_parse_repetition, _parse_argument])
+
+
+def _parse_repetition(state, patterns):
+    position, tokens = state
+    if position + 1 >= len(tokens):
+        raise InvalidSignature()
+    if tokens[position + 1][0] != 'repetition':
+        raise InvalidSignature()
+    if tokens[position][0] != 'identifier':
+        raise InvalidSignature()
+    patterns.append(Repetition(Argument(tokens[position][1])))
+    return position + 2, tokens
+
+
+def _parse_argument(state, patterns):
+    position, tokens = state
+    type, lexeme = tokens[position]
+    if type == 'identifier':
+        patterns.append(Argument(lexeme))
+        return position + 1, tokens
+    raise InvalidSignature()
+
+
+def _either(state, patterns, parsers):
+    for parser in parsers:
+        transaction = []
+        try:
+            state = parser(state, transaction)
+            patterns.extend(transaction)
+            return state
+        except InvalidSignature:
+            pass
+    raise
 
 
 class Signature(object):
     @classmethod
-    def from_string(cls, string, allow_repetitions=False):
-        def parse_word(word):
-            if word.endswith('...') and is_python_identifier(word[:-3]):
-                if allow_repetitions:
-                    return Repetition(Argument(word[:-3]))
-                raise InvalidSignature('repetitions are not allowed: %s' % word)
-            elif is_python_identifier(word):
-                return Argument(word)
-            raise InvalidSignature('not a valid python identifier: %r' % word)
-        patterns = []
-        for word in string.split(' ') if string else []:
-            patterns.append(parse_word(word))
-        return cls(patterns)
+    def from_string(cls, string, option=True):
+        return cls(_parse_signature(string, option=option))
 
     def __init__(self, patterns):
         self.patterns = patterns

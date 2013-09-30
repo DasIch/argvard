@@ -42,9 +42,9 @@ class ExecutableBase(object):
         self.commands = OrderedDict()
         self.description = None
 
-        self.add_default_options()
+        self.add_help_option()
 
-    def add_default_options(self):
+    def add_help_option(self):
         @self.option('-h|--help', overrideable=True)
         def help(context):
             """

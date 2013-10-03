@@ -551,7 +551,6 @@ class TestHelpOption(object):
             u'    Show this text.\n'
         )
 
-
     def test_command_description(self, capsys, name):
         argvard = Argvard()
         argvard.main()(lambda context: None)

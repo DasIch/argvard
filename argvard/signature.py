@@ -144,8 +144,18 @@ def _either(state, patterns, parsers):
 
 
 class Signature(object):
+    """
+    Represents a signature using patterns.
+    """
     @classmethod
     def from_string(cls, string, option=True):
+        """
+        Returns a :class:`Signature` object based on the given `string`. If
+        `option` is `True`, repetitions or optional patterns will not be
+        allowed.
+
+        If the `string` cannot be parsed, :exc:`InvalidSignature` is raised.
+        """
         return cls(_parse_signature(string, option=option))
 
     def __init__(self, patterns):
@@ -153,19 +163,32 @@ class Signature(object):
 
     @property
     def usage(self):
+        """
+        A usage string that describes the signature.
+        """
         return u' '.join(u'<%s>' % pattern.usage for pattern in self.patterns)
 
     def parse(self, argv):
+        """
+        Parses the given `argv` and returns a dictionary mapping argument names
+        to the values found in `argv`.
+        """
         rv = {}
         for pattern in self.patterns:
             pattern.apply(rv, argv)
         return rv
 
     def call_with_arguments(self, callable, argv):
+        """
+        Parses `argv` and calls `callable` with the result.
+        """
         return callable(**self.parse(argv))
 
 
 class Argument(object):
+    """
+    Represents a positional argument with the given `name`.
+    """
     def __init__(self, name):
         self.name = name
 
@@ -181,6 +204,9 @@ class Argument(object):
 
 
 class Repetition(object):
+    """
+    Represents one or more occurences of the given `pattern`.
+    """
     def __init__(self, pattern):
         self.pattern = pattern
 
@@ -197,6 +223,9 @@ class Repetition(object):
 
 
 class Optional(object):
+    """
+    Represents an optional occurence of the given `patterns`.
+    """
     def __init__(self, patterns):
         self.patterns = patterns
 

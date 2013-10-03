@@ -34,7 +34,10 @@ class TestArgvard(object):
 
         @argvard.main()
         def main(context):
-            assert context.argvard.get_usage(context) == u'application [-h|--help]'
+            assert (
+                context.argvard.get_usage(context) ==
+                u'application [-h|--help]'
+            )
         argvard(['application'])
 
         argvard = Argvard()
@@ -45,14 +48,20 @@ class TestArgvard(object):
 
         @argvard.main()
         def main2(context):
-            assert context.argvard.get_usage(context) == u'application [-h|--help] [--foo]'
+            assert (
+                context.argvard.get_usage(context) ==
+                u'application [-h|--help] [--foo]'
+            )
         argvard(['application'])
 
         argvard = Argvard()
 
         @argvard.main('foo bar')
         def main3(context, foo, bar):
-            assert context.argvard.get_usage(context) == u'application [-h|--help] <foo> <bar>'
+            assert (
+                context.argvard.get_usage(context) ==
+                u'application [-h|--help] <foo> <bar>'
+            )
 
         argvard(['application', 'foo', 'bar'])
 
@@ -89,7 +98,10 @@ class TestArgvard(object):
 
         @command.main()
         def main(context):
-            assert context.argvard.get_usage(context) == 'application command [-h|--help]'
+            assert (
+                context.argvard.get_usage(context) ==
+                'application command [-h|--help]'
+            )
         argvard.register_command('command', command)
         argvard(['application', 'command'])
 
@@ -103,7 +115,10 @@ class TestArgvard(object):
 
         @command.main()
         def main2(context):
-            assert context.command.get_usage(context) == 'application command [-h|--help] [--foo]'
+            assert (
+                context.command.get_usage(context) ==
+                'application command [-h|--help] [--foo]'
+            )
         argvard.register_command('command', command)
         argvard(['application', 'command'])
 
@@ -113,7 +128,10 @@ class TestArgvard(object):
 
         @command.main('foo bar')
         def main3(context, foo, bar):
-            assert context.command.get_usage(context) == 'application command [-h|--help] <foo> <bar>'
+            assert (
+                context.command.get_usage(context) ==
+                'application command [-h|--help] <foo> <bar>'
+            )
         argvard.register_command('command', command)
         argvard(['application', 'command', 'foo', 'bar'])
 
@@ -401,7 +419,10 @@ class TestOption(object):
 
         @argvard.main()
         def main(context):
-            assert context.argvard.get_usage(context) == u'application [-h|--help] [-a|--abc]'
+            assert (
+                context.argvard.get_usage(context) ==
+                u'application [-h|--help] [-a|--abc]'
+            )
         argvard(['application', '-a', '--abc'])
         assert called == [True, True]
 

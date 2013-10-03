@@ -84,7 +84,8 @@ class ExecutableBase(object):
         usage = u' '.join(context.command_path)
         if self.options:
             usage += u' ' + ' '.join(
-                u'[%s]' % option.usage for option in unique(itervalues(self.options))
+                u'[%s]' % option.usage
+                for option in unique(itervalues(self.options))
             )
         if self.main_signature and self.main_signature.usage:
             usage += u' ' + self.main_signature.usage
@@ -194,7 +195,8 @@ class Argvard(ExecutableBase):
                 self.call_main(context, argv)
         except UsageError as error:
             print(u'error: %s' % error.args[0], file=sys.stderr)
-            print(u'usage: %s' % (context.command or context.argvard).get_usage(context), file=sys.stderr)
+            caller = context.command or context.argvard
+            print(u'usage: %s' % caller.get_usage(context), file=sys.stderr)
             sys.exit(1)
 
 

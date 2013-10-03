@@ -47,7 +47,8 @@ from argvard._compat import PY2
         'abc.def',
         '123',
         '€',
-        ''
+        '',
+        'in'
     ], repeat(False)))
 )
 def test_is_python_identifier(possible_identifier, result):

@@ -59,7 +59,7 @@ def is_python3_identifier(possible_identifier):
         bool(possible_identifier) and
         _is_in_id_start(possible_identifier[0]) and
         all(map(_is_in_id_continue, possible_identifier[1:]))
-    )
+    ) and not iskeyword(possible_identifier)
 
 
 def _is_in_id_start(character):

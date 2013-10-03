@@ -109,6 +109,7 @@ class ExecutableBase(object):
 
     def main(self, signature=''):
         signature = Signature.from_string(signature, option=False)
+
         def decorator(function):
             if self.main_func is not None:
                 raise RuntimeError('main is already defined')

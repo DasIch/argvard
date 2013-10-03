@@ -39,6 +39,7 @@ _OPTION_TOKENS = [
 
 def _build_tokenizer(tokens):
     regex = re.compile('|'.join('(%s)' % regex for name, regex in tokens))
+
     def _tokenize(string):
         position = 0
         while position < len(string):

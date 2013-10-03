@@ -31,21 +31,25 @@ from argvard.exceptions import InvalidSignature, ArgumentMissing
 class TestArgvard(object):
     def test_get_usage(self):
         argvard = Argvard()
+
         @argvard.main()
         def main(context):
             assert context.argvard.get_usage(context) == u'application [-h|--help]'
         argvard(['application'])
 
         argvard = Argvard()
+
         @argvard.option('--foo')
         def option(context):
             pass
+
         @argvard.main()
         def main2(context):
             assert context.argvard.get_usage(context) == u'application [-h|--help] [--foo]'
         argvard(['application'])
 
         argvard = Argvard()
+
         @argvard.main('foo bar')
         def main3(context, foo, bar):
             assert context.argvard.get_usage(context) == u'application [-h|--help] <foo> <bar>'
@@ -55,10 +59,12 @@ class TestArgvard(object):
     def test_register_command(self):
         called = []
         argvard = Argvard()
+
         @argvard.main()
         def foo(context):
             called.append('application')
         command = Command()
+
         @command.main()
         def bar(context):
             called.append('command')
@@ -80,6 +86,7 @@ class TestArgvard(object):
         argvard = Argvard()
         argvard.main()(lambda context: None)
         command = Command()
+
         @command.main()
         def main(context):
             assert context.argvard.get_usage(context) == 'application command [-h|--help]'
@@ -89,9 +96,11 @@ class TestArgvard(object):
         argvard = Argvard()
         argvard.main()(lambda context: None)
         command = Command()
+
         @command.option('--foo')
         def option(context):
             pass
+
         @command.main()
         def main2(context):
             assert context.command.get_usage(context) == 'application command [-h|--help] [--foo]'
@@ -101,6 +110,7 @@ class TestArgvard(object):
         argvard = Argvard()
         argvard.main()(lambda context: None)
         command = Command()
+
         @command.main('foo bar')
         def main3(context, foo, bar):
             assert context.command.get_usage(context) == 'application command [-h|--help] <foo> <bar>'
@@ -109,6 +119,7 @@ class TestArgvard(object):
 
     def test_define_main_twice(self):
         argvard = Argvard()
+
         @argvard.main()
         def foo():
             pass
@@ -126,6 +137,7 @@ class TestArgvard(object):
     def test_main(self, capsys):
         called = []
         argvard = Argvard()
+
         @argvard.main()
         def main(context):
             called.append(True)
@@ -145,6 +157,7 @@ class TestArgvard(object):
     def test_main_with_signature(self):
         called = []
         argvard = Argvard()
+
         @argvard.main('name')
         def main(context, name):
             called.append(name)
@@ -153,6 +166,7 @@ class TestArgvard(object):
 
         called = []
         argvard = Argvard()
+
         @argvard.main('arguments...')
         def main2(context, arguments):
             called.append(arguments)
@@ -161,6 +175,7 @@ class TestArgvard(object):
 
         called = []
         argvard = Argvard()
+
         @argvard.main('[foo]')
         def main3(context, foo='default'):
             called.append(foo)
@@ -172,6 +187,7 @@ class TestArgvard(object):
 
         called = []
         argvard = Argvard()
+
         @argvard.main('[foo [bar]]')
         def main4(context, foo='foo', bar='bar'):
             called.extend([foo, bar])
@@ -186,6 +202,7 @@ class TestArgvard(object):
 
         called = []
         argvard = Argvard()
+
         @argvard.main('[foo...]')
         def main5(context, foo=None):
             if foo is None:
@@ -229,6 +246,7 @@ class TestOption(object):
 
     def test_define_twice(self):
         argvard = Argvard()
+
         @argvard.option('--option')
         def foo():
             pass
@@ -241,9 +259,11 @@ class TestOption(object):
     def test_overrideable(self):
         called = []
         argvard = Argvard()
+
         @argvard.option('--option', overrideable=True)
         def foo(context):
             called.append('foo')
+
         @argvard.option('--option')
         def bar(context):
             called.append('bar')
@@ -254,6 +274,7 @@ class TestOption(object):
     def test_basic(self):
         called = []
         argvard = Argvard()
+
         @argvard.option('--option')
         def option(context):
             called.append(True)
@@ -266,6 +287,7 @@ class TestOption(object):
     def test_with_signature(self):
         called = []
         argvard = Argvard()
+
         @argvard.option('--option argument')
         def option(context, argument):
             called.append(argument)
@@ -294,6 +316,7 @@ class TestOption(object):
     def test_short_with_concatenated_argument(self):
         called = []
         argvard = Argvard()
+
         @argvard.option('-o argument')
         def option(context, argument):
             called.append(argument)
@@ -304,9 +327,11 @@ class TestOption(object):
     def test_multiple_shorts(self):
         called = []
         argvard = Argvard()
+
         @argvard.option('-a')
         def a(context):
             called.append('a')
+
         @argvard.option('-b')
         def b(context):
             called.append('b')
@@ -317,6 +342,7 @@ class TestOption(object):
     def test_option_lookalike_ignored(self):
         called = []
         argvard = Argvard()
+
         @argvard.main('argument')
         def main(context, argument):
             called.append(argument)
@@ -326,6 +352,7 @@ class TestOption(object):
     def test_standalone_short_prefix_is_preserved(self):
         called = []
         argvard = Argvard()
+
         @argvard.main('argument')
         def main(context, argument):
             called.append(argument)
@@ -335,6 +362,7 @@ class TestOption(object):
     def test_long_with_concatenated_argument(self):
         called = []
         argvard = Argvard()
+
         @argvard.option('--option argument')
         def option(context, argument):
             called.append(argument)
@@ -344,9 +372,11 @@ class TestOption(object):
 
     def test_ordering(self):
         argvard = Argvard()
+
         @argvard.option('-a')
         def foo():
             pass
+
         @argvard.option('-b')
         def bar():
             pass
@@ -354,6 +384,7 @@ class TestOption(object):
 
     def test_usage(self):
         argvard = Argvard()
+
         @argvard.option('-a foo bar')
         def option(foo, bar):
             pass
@@ -362,9 +393,11 @@ class TestOption(object):
     def test_multiple_name_definition(self):
         called = []
         argvard = Argvard()
+
         @argvard.option('-a|--abc')
         def option(context):
             called.append(True)
+
         @argvard.main()
         def main(context):
             assert context.argvard.get_usage(context) == u'application [-h|--help] [-a|--abc]'
@@ -375,6 +408,7 @@ class TestOption(object):
 class TestContext(object):
     def test_defaults(self):
         argvard = Argvard(defaults={'a': 1})
+
         @argvard.option('-a')
         def option(context):
             assert 'a' in context
@@ -384,11 +418,13 @@ class TestContext(object):
 
     def test_command_defaults(self):
         argvard = Argvard()
+
         @argvard.option('-a')
         def option(context):
             context['a'] = 1
         argvard.main()(lambda context: None)
         command = Command(defaults={'b': 1})
+
         @command.main()
         def main(context):
             assert 'a' in context
@@ -400,11 +436,13 @@ class TestContext(object):
 
     def test_command_defaults_dont_override_context(self):
         argvard = Argvard()
+
         @argvard.option('-a')
         def option(context):
             context['a'] = 1
         argvard.main()(lambda context: None)
         command = Command(defaults={'a': 2})
+
         @command.main()
         def main(context):
             assert 'a' in context
@@ -414,11 +452,13 @@ class TestContext(object):
 
     def test_inherited_by_commands(self):
         argvard = Argvard()
+
         @argvard.option('-a')
         def option(context):
             context['a'] = 1
         argvard.main()(lambda context: None)
         command = Command()
+
         @command.main()
         def main(context):
             assert 'a' in context
@@ -428,6 +468,7 @@ class TestContext(object):
 
     def test_argvard_attribute(self):
         argvard = Argvard()
+
         @argvard.main()
         def main(context):
             assert context.argvard is argvard
@@ -435,12 +476,14 @@ class TestContext(object):
 
     def test_command_path_attribute(self):
         argvard = Argvard()
+
         @argvard.main()
         def main(context):
             assert context.command_path == ['application']
         argvard(['application'])
 
         command = Command()
+
         @command.main()
         def command_main(context):
             assert context.command_path == ['application', 'command']
@@ -449,6 +492,7 @@ class TestContext(object):
 
     def test_command_attribute(self):
         argvard = Argvard()
+
         @argvard.main()
         def main(context):
             assert context.command is None
@@ -457,6 +501,7 @@ class TestContext(object):
         argvard = Argvard()
         argvard.main()(lambda context: None)
         command = Command()
+
         @command.main()
         def main2(context):
             assert context.command is command
@@ -487,6 +532,7 @@ class TestHelpOption(object):
 
     def test_application_description(self, capsys, name):
         argvard = Argvard()
+
         @argvard.main()
         def main():
             """
@@ -509,6 +555,7 @@ class TestHelpOption(object):
 
     def test_option_description(self, capsys, name):
         argvard = Argvard()
+
         @argvard.option('--foo')
         def option(context):
             """
@@ -534,6 +581,7 @@ class TestHelpOption(object):
         argvard = Argvard()
         argvard.main()(lambda context: None)
         command = Command()
+
         @command.main()
         def main(context):
             pass
@@ -555,6 +603,7 @@ class TestHelpOption(object):
         argvard = Argvard()
         argvard.main()(lambda context: None)
         command = Command()
+
         @command.main()
         def main(context):
             """

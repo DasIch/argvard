@@ -8,6 +8,7 @@ env:
   - TOX_ENV=pypy
   - TOX_ENV=py33
   - TOX_ENV=packaging
+  - TOX_ENV=style
 
 install:
   # Travis uses an outdated PyPy, this installs the most recent one.

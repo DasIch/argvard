@@ -9,6 +9,10 @@ env:
   - TOX_ENV=py33
   - TOX_ENV=packaging
   - TOX_ENV=style
+  - TOX_ENV=docs
+  - TOX_ENV=docs-linkcheck
+  - TOX_ENV=docs-code
+  - TOX_ENV=docs-code3
 
 install:
   # Travis uses an outdated PyPy, this installs the most recent one.

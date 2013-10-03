@@ -230,6 +230,7 @@ class TestArgvard(object):
         assert stdout == b'foo\nbar\nbaz\n'
         assert stderr == b''
 
+
 class TestOption(object):
     @pytest.mark.parametrize('name', [
         '',

@@ -4,6 +4,8 @@ from argvard import Argvard
 
 
 application = Argvard()
+
+
 @application.main('[arguments...]')
 def main(context, arguments):
     for argument in arguments:

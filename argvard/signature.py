@@ -25,7 +25,7 @@ from argvard.exceptions import InvalidSignature, ArgumentMissing
 
 
 _TOKENS = [
-    ('identifier',  r'[a-zA-Z_][a-zA-Z_0-9]*'),
+    ('identifier', r'[a-zA-Z_][a-zA-Z_0-9]*'),
     ('repetition', r'\.\.\.'),
     ('[', r'\['),
     (']', r'\]'),

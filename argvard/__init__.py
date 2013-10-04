@@ -92,14 +92,35 @@ class ExecutableBase(object):
         return usage
 
     def register_command(self, name, command):
+        """
+        Registers the `command` with the given `name`.
+
+        If the `name` has already been used to register a command a
+        :exc:`RuntimeError` will be raised.
+        """
         if name in self.commands:
             raise RuntimeError('%s is already defined' % name)
         self.commands[name] = command
 
-    def option(self, string, overrideable=False):
+    def option(self, signature, overrideable=False):
+        """
+        A decorator for registering an option with the given `signature`::
+
+            @app.option('--option')
+            def option(context):
+                # do something
+                pass
+
+        If the name in the signature has already been used to register an
+        option, a :exc:`RuntimeError` is raised unless the registered option
+        has been defined with `overrideable` set to `True`.
+
+        :param signature: The signature of the option as a string.
+        :param overrideable: If `True` the registered option can be overridden.
+        """
         def decorator(function):
             option = Option.from_string(
-                string, function, overrideable=overrideable
+                signature, function, overrideable=overrideable
             )
             for name in option.names:
                 if name in self.options and not self.options[name].overrideable:
@@ -109,6 +130,18 @@ class ExecutableBase(object):
         return decorator
 
     def main(self, signature=''):
+        """
+        A decorator that is used to register the main function with the given
+        `signature`::
+
+            @app.main()
+            def main(context):
+                # do something
+                pass
+
+        The main function is called, after any options and if no command has
+        been called.
+        """
         signature = Signature.from_string(signature, option=False)
 
         def decorator(function):
@@ -177,6 +210,18 @@ class ExecutableBase(object):
 
 
 class Argvard(ExecutableBase):
+    """
+    The argvard object is the central object of the command line application.
+
+    Instances are callable with the command line arguments, :data:`sys.argv` by
+    default.
+
+    The object acts as a registry for options and commands and calls them as
+    necessary.
+
+    :param defaults: A dictionary containing the initial values for the
+                     `context`.
+    """
     def create_context(self, argv):
         context = Context(self, argv[0])
         context.update(self.defaults)
@@ -201,6 +246,18 @@ class Argvard(ExecutableBase):
 
 
 class Command(ExecutableBase):
+    """
+    A command - like an argvard object - is a registry of options and commands,
+    that represents a distinct action.
+
+    Commands can be registered with any number of argvard objects, any number
+    of times (under different names.)
+
+    :param defaults: A dictionary containing the initial values for the
+                     `context`, any values already contained in the context
+                     once the command is called will not be overridden with a
+                     default value.
+    """
     def update_context(self, context):
         context.command = self
         for key, value in iteritems(self.defaults):

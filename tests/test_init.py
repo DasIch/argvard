@@ -530,6 +530,24 @@ class TestContext(object):
         argvard.register_command('command', command)
         argvard(['application', 'command'])
 
+    def test_caller_attribute(self):
+        argvard = Argvard()
+
+        @argvard.main()
+        def main(context):
+            assert context.caller is argvard
+
+        command = Command()
+
+        @command.main()
+        def main2(context):
+            assert context.caller is command
+
+        argvard.register_command('command', command)
+
+        argvard(['application'])
+        argvard(['application', 'command'])
+
 
 class TestHelpOption(object):
     @pytest.fixture(params=['-h', '--help'])

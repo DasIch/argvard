@@ -354,3 +354,7 @@ class Context(dict):
         self.command_path = [application_name]
 
         self.command = None
+
+    @property
+    def caller(self):
+        return self.command or self.argvard

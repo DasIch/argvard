@@ -347,6 +347,26 @@ class Option(object):
 
 
 class Context(dict):
+    """
+    The context object is a dictionary, passed to options and main functions,
+    which they can use to store information.
+
+    It further provides information useful for introspection and debugging
+    through attributes.
+
+    .. attribute:: argvard
+
+       The current application.
+
+    .. attribute:: command
+
+       The current command or `None`.
+
+    .. attribute:: command_path
+
+       A list containing the name of the application and the names of all
+       commands called so far.
+    """
     def __init__(self, argvard, application_name):
         self.argvard = argvard
         self.command_path = [application_name]
@@ -355,4 +375,7 @@ class Context(dict):
 
     @property
     def caller(self):
+        """
+        The current command or argvard object.
+        """
         return self.command or self.argvard

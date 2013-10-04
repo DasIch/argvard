@@ -29,3 +29,10 @@ Command Object
 .. autoclass:: Command
    :members:
    :inherited-members:
+
+
+Context Object
+--------------
+
+.. autoclass:: Context
+   :members:

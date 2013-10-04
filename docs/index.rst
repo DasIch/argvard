@@ -11,6 +11,7 @@ User's Guide
 .. toctree::
 
    user/installation.rst
+   user/tutorial/index.rst
 
 
 API Reference

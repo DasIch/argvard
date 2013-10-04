@@ -53,9 +53,7 @@ class ExecutableBase(object):
             """
             Show this text.
             """
-            print(u'usage: %s' %
-                (context.command or context.argvard).get_usage(context)
-            )
+            print(u'usage: %s' % context.caller.get_usage(context))
             if self.description:
                 print()
                 print(self.description)

@@ -18,3 +18,4 @@ Additional Information
 .. toctree::
 
    additional/license.rst
+   additional/changelog.rst

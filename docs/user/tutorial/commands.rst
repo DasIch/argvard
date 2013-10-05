@@ -6,6 +6,8 @@ used to install Argvard, your application often does not perform a specific
 action like greeting someone but instead allows the user to perform multiple
 distinct actions.
 
+.. _pip: http://www.pip-installer.org/
+
 In the case of pip such an action is installing or uninstalling something.
 These are fundamentally different actions, not just in what they operate on,
 how they operate but in what they do. We do not want to choose between these

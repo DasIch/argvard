@@ -39,5 +39,5 @@ people::
     $ python hello.py --greeting Hi
     Hi, World!
 
-Congratulations! You have now learned everything you need to know about
-Argvard, to create simple command line applications.
+
+Continue with :doc:`commands`.

@@ -1,5 +1,5 @@
 Creating a basic "Hello World!"-Application
-==========================================
+===========================================
 
 The first step on our journey will be to create a simple "Hello World!"
 application. The first part of that application consists of importing what we

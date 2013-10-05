@@ -2,7 +2,7 @@ Welcome to Argvard
 ==================
 
 Welcome to Argvard's documentation. If you are new to Argvard, start with
-:ref:`installation`.
+:ref:`installation` and read the :doc:`user/tutorial/index` afterwards.
 
 
 User's Guide

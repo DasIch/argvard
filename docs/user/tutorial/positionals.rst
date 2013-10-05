@@ -1,5 +1,3 @@
-.. _positionals:
-
 Dealing with positional arguments
 =================================
 

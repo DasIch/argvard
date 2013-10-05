@@ -12,6 +12,7 @@ User's Guide
 
    user/installation.rst
    user/tutorial/index.rst
+   user/signatures.rst
 
 
 API Reference

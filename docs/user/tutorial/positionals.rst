@@ -84,4 +84,7 @@ Now we can greet any number of people::
     $ python hello.py Daniel Horst Peter
     Hello, Daniel, Horst and Peter!
 
+
+.. seealso:: :doc:`../signatures`
+
 Continue with :doc:`options`.

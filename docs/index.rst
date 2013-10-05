@@ -9,6 +9,7 @@ User's Guide
 ------------
 
 .. toctree::
+   :maxdepth: 2
 
    user/installation.rst
    user/tutorial/index.rst

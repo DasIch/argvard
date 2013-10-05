@@ -24,3 +24,7 @@ be simple and intuitive to use without being constraining.
 
     if __name__ == '__main__':
         application()
+
+If you want to learn more take a look at the documentation_.
+
+.. _documentation: https://argvard.readthedocs.org

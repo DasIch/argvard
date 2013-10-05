@@ -45,3 +45,5 @@ without any side effects.
 
 Once you have typed that into your editor, save it as `hello.py` and execute
 it with ``python hello.py``. It should print "Hello, World!" and exit.
+
+Continue with :ref:`positionals`.

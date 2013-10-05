@@ -9,3 +9,4 @@ explore the features provided by Argvard.
 .. toctree::
 
    basics.rst
+   positionals.rst

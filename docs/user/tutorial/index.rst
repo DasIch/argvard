@@ -10,3 +10,4 @@ explore the features provided by Argvard.
 
    basics.rst
    positionals.rst
+   options.rst

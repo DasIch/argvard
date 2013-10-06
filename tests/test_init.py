@@ -235,10 +235,10 @@ class TestArgvard(object):
         argvard(['application', 'spam', 'eggs'])
         assert called == [['spam', 'eggs']]
 
-    def test_main_without_argv(self):
+    def test_main_without_argv(self, test_scripts_dir):
         process = subprocess.Popen(
             [
-                'python', os.path.join(os.path.dirname(__file__), 'echo.py'),
+                'python', os.path.join(test_scripts_dir, 'echo.py'),
                 'foo', 'bar', 'baz'
             ],
             stdout=subprocess.PIPE,

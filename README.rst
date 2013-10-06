@@ -7,6 +7,9 @@ Argvard
 .. image:: https://coveralls.io/repos/DasIch/argvard/badge.png?branch=master
    :target: https://coveralls.io/r/DasIch/argvard?branch=master
 
+.. image:: https://badge.fury.io/py/Argvard.png
+   :target: http://badge.fury.io/py/Argvard
+
 Argvard is a framework for command line applications inspired by Flask_ and
 docopt_, available under the `Apache License, Version 2.0`_. It is designed to
 be simple and intuitive to use without being constraining.

@@ -4,3 +4,5 @@
 docs/_build
 .coverage
 htmlcov/
+build/
+dist/

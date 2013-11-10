@@ -248,6 +248,16 @@ class TestArgvard(object):
         assert stdout == b'foo\nbar\nbaz\n'
         assert stderr == b''
 
+    def test_from_main(self):
+        called = []
+
+        @Argvard.from_main()
+        def application(context):
+            called.append(True)
+
+        application(['application'])
+        assert called == [True]
+
 
 class TestOption(object):
     @pytest.mark.parametrize('name', [

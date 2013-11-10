@@ -36,6 +36,21 @@ __version_info__ = (0, 2, 0)
 
 
 class ExecutableBase(object):
+    @classmethod
+    def from_main(cls, signature=''):
+        """
+        A decorator that creates an instance and registers the decorated
+        functionan main function, see :meth:`main` for more information.
+
+        .. versionadded:: 0.2
+        """
+        instance = cls()
+
+        def decorate(function):
+            instance.main(signature)(function)
+            return instance
+        return decorate
+
     def __init__(self, defaults=None):
         self.defaults = {} if defaults is None else defaults
 

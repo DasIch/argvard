@@ -40,7 +40,7 @@ class ExecutableBase(object):
     def from_main(cls, signature=''):
         """
         A decorator that creates an instance and registers the decorated
-        functionan main function, see :meth:`main` for more information.
+        function as main function, see :meth:`main` for more information.
 
         .. versionadded:: 0.2
         """

@@ -12,7 +12,7 @@ API
 .. data:: __version_info__
 
    The version as a tuple, containing the major, minor, and bugfix version. You
-   should this, if you need to implement any version checks.
+   should use this, if you need to implement any version checks.
 
 
 Application Object

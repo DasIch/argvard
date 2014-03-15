@@ -6,6 +6,8 @@ Version 0.2.1
 
 *In development*
 
+- Fixed a typos in the documentation.
+
 
 Version 0.2.0
 -------------

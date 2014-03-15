@@ -191,6 +191,8 @@ class ExecutableBase(object):
                 return False
 
     def call_main(self, context, argv):
+        if self.main_func is None:
+            self.options['--help'].function(context)
         arguments = self.main_signature.parse(argv)
         remaining = list(argv)
         if remaining:
@@ -243,8 +245,6 @@ class Argvard(ExecutableBase):
     def __call__(self, argv=None):
         if argv is None:
             argv = sys.argv
-        if self.main_func is None:
-            raise RuntimeError('main is undefined')
         argv = Argv(self.normalize_argv(argv))
         context = self.create_context(argv)
         self.call_options(context, argv)
@@ -277,8 +277,6 @@ class Command(ExecutableBase):
             context.setdefault(key, value)
 
     def __call__(self, context, argv):
-        if self.main_func is None:
-            raise RuntimeError('main is undefined')
         self.update_context(context)
         self.call_options(context, argv)
         if not self.call_commands(context, argv):

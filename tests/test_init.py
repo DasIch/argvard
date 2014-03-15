@@ -147,10 +147,20 @@ class TestArgvard(object):
             def bar():
                 pass
 
-    def test_call_without_main(self):
+    def test_call_without_main(self, capsys):
         argvard = Argvard()
-        with pytest.raises(RuntimeError):
+        with pytest.raises(SystemExit) as exc_info:
             argvard(['application'])
+        assert exc_info.value.code == 1
+        stdout, stderr = capsys.readouterr()
+        assert stdout == (
+            u'usage: application [-h|--help]\n'
+            u'\n'
+            u'options:\n'
+            u'-h, --help\n'
+            u'    Show this text.\n'
+        )
+        assert stderr == u''
 
     def test_main(self, capsys):
         called = []

@@ -6,6 +6,9 @@ Version 0.3.0
 
 *In development*
 
+- Execution is now delegated to ``--help``, if no main function has been
+  defined.
+
 
 Version 0.2.1
 -------------

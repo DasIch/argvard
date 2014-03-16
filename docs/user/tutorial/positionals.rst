@@ -65,9 +65,9 @@ greet multiple people::
         if len(name) == 1:
             print(u'Hello, %s!' % name[0])
         elif len(name) == 2:
-            print(u'Hello %s and %s!' % (name[0], name[1]))
+            print(u'Hello, %s and %s!' % (name[0], name[1]))
         else:
-            print(u'Hello %s and %s!' % (u', '.join(name[:-1]), name[-1]))
+            print(u'Hello, %s and %s!' % (u', '.join(name[:-1]), name[-1]))
 
 The function does quite a bit more than the previous ones, to achieve a nice
 formatting. Apart from that what has really changed is that we have added `...`

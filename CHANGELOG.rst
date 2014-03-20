@@ -4,8 +4,6 @@ Changelog
 Version 0.2.1
 -------------
 
-*In development*
-
 - Fixed typos in the documentation.
 
 

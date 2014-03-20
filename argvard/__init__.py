@@ -31,7 +31,7 @@ from argvard.exceptions import UnexpectedArgument, UsageError, InvalidSignature
 from argvard._compat import implements_iterator, iteritems, itervalues
 
 
-__version__ = '0.2.1-dev'
+__version__ = '0.2.1'
 __version_info__ = (0, 2, 1)
 
 

@@ -8,6 +8,8 @@ Version 0.3.1
 
 - Added Python 3.4 support. It should have worked previously but from now on
   it's tested.
+- Fix an issue that caused docstrings to not be properly dedented when used
+  as descriptions, producing among other things badly formatted help text.
 
 Version 0.3.0
 -------------

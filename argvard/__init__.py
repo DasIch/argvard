@@ -342,7 +342,7 @@ class Option(object):
         if self.function.__doc__ is None:
             self.description = None
         else:
-            self.description = textwrap.dedent(self.function.__doc__.strip())
+            self.description = textwrap.dedent(self.function.__doc__).strip()
         self.signature = signature
         self.overrideable = overrideable
 

@@ -1,6 +1,11 @@
 Changelog
 =========
 
+Version 0.3.1
+-------------
+
+*In development*
+
 Version 0.3.0
 -------------
 

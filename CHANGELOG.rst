@@ -6,6 +6,9 @@ Version 0.3.1
 
 *In development*
 
+- Added Python 3.4 support. It should have worked previously but from now on
+  it's tested.
+
 Version 0.3.0
 -------------
 

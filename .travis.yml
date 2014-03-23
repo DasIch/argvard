@@ -7,6 +7,7 @@ env:
   - TOX_ENV=py27
   - TOX_ENV=pypy
   - TOX_ENV=py33
+  - TOX_ENV=py34
   - TOX_ENV=packaging
   - TOX_ENV=style
   - TOX_ENV=docs
@@ -14,6 +15,7 @@ env:
   - TOX_ENV=docs-code-python27
   - TOX_ENV=docs-code-pypy
   - TOX_ENV=docs-code-python33
+  - TOX_ENV=docs-code-python34
 
 install:
   # Travis uses an outdated PyPy, this installs the most recent one.

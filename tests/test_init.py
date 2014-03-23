@@ -620,6 +620,8 @@ class TestHelpOption(object):
         def option(context):
             """
             A description.
+
+            Another line.
             """
         argvard.main()(lambda context: None)
         with pytest.raises(SystemExit) as exception:
@@ -635,6 +637,8 @@ class TestHelpOption(object):
             u'    Show this text.\n'
             u'--foo\n'
             u'    A description.\n'
+            u'    \n'
+            u'    Another line.\n'
         )
 
     def test_command(self, capsys, name):

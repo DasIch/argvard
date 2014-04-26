@@ -27,6 +27,7 @@ from collections import OrderedDict
 
 from argvard.utils import unique
 from argvard.signature import Signature
+from argvard.annotations import annotations
 from argvard.exceptions import UnexpectedArgument, UsageError, InvalidSignature
 from argvard._compat import implements_iterator, iteritems, itervalues
 
@@ -132,6 +133,11 @@ class ExecutableBase(object):
         :param overrideable: If `True` the registered option can be overridden.
         """
         def decorator(function):
+            try:
+                function = annotations()(function)
+            except RuntimeError:
+                pass
+
             option = Option.from_string(
                 signature, function, overrideable=overrideable
             )
@@ -160,6 +166,11 @@ class ExecutableBase(object):
         def decorator(function):
             if self.main_func is not None:
                 raise RuntimeError('main is already defined')
+            try:
+                function = annotations()(function)
+            except RuntimeError:
+                pass
+
             self.main_func = function
             self.main_signature = signature
             if function.__doc__:
@@ -247,8 +258,8 @@ class Argvard(ExecutableBase):
             argv = sys.argv
         argv = Argv(self.normalize_argv(argv))
         context = self.create_context(argv)
-        self.call_options(context, argv)
         try:
+            self.call_options(context, argv)
             if not self.call_commands(context, argv):
                 self.call_main(context, argv)
         except UsageError as error:

@@ -24,8 +24,8 @@ import subprocess
 
 import pytest
 
-from argvard import Argvard, Command
-from argvard.exceptions import InvalidSignature, ArgumentMissing
+from argvard import Argvard, Command, UsageError
+from argvard.exceptions import InvalidSignature
 
 
 class TestArgvard(object):
@@ -268,6 +268,41 @@ class TestArgvard(object):
         application(['application'])
         assert called == [True]
 
+    def test_main_raises_usageerror(self, capsys):
+        argvard = Argvard()
+
+        @argvard.main()
+        def main(context):
+            raise UsageError('hello from argvard')
+
+        command = Command()
+
+        @command.main()
+        def command_main(context):
+            raise UsageError('hello from command')
+
+        argvard.register_command('command', command)
+
+        with pytest.raises(SystemExit):
+            argvard(['application'])
+
+        stdout, stderr = capsys.readouterr()
+        assert stdout == u''
+        assert stderr == (
+            u'error: hello from argvard\n'
+            u'usage: application [-h|--help]\n'
+        )
+
+        with pytest.raises(SystemExit):
+            argvard(['application', 'command'])
+
+        stdout, stderr = capsys.readouterr()
+        assert stdout == u''
+        assert stderr == (
+            u'error: hello from command\n'
+            u'usage: application command [-h|--help]\n'
+        )
+
 
 class TestOption(object):
     @pytest.mark.parametrize('name', [
@@ -333,7 +368,7 @@ class TestOption(object):
         argvard.main()(lambda context: None)
         argvard(['application'])
         assert called == []
-        with pytest.raises(ArgumentMissing):
+        with pytest.raises(SystemExit):
             argvard(['application', '--option'])
         argvard(['application', '--option', 'foo'])
         assert called == ['foo']

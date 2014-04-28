@@ -72,7 +72,7 @@ def set_annotations(**kwargs):
 
 
 def with_annotations(func):
-    if func.__annotations__.get('_argvard', None) == IS_ANNOTATED:
+    if getattr(func, '_argvard_annotations', None) == IS_ANNOTATED:
         raise RuntimeError('Decorator already applied.')
     if 'context' in func.__annotations__:
         raise RuntimeError('Setting type annotations on the context '
@@ -92,7 +92,7 @@ def with_annotations(func):
 
         return func(context, **arguments)
 
-    wrapper.__annotations__['_argvard'] = IS_ANNOTATED
+    wrapper._argvard_annotations = IS_ANNOTATED
     return wrapper
 
 

@@ -76,7 +76,7 @@ def with_annotations(func):
         raise RuntimeError('Decorator already applied.')
     if 'context' in func.__annotations__:
         raise RuntimeError('Setting type annotations on the context '
-                           'variable is not allowed.')
+                           'argument is not allowed.')
 
     @functools.wraps(func)
     def wrapper(context, **arguments):
@@ -92,7 +92,11 @@ def with_annotations(func):
 
         return func(context, **arguments)
 
+    # This will work as long as any intermediate decorators use functools.wraps
+    # or an equivalent, to copy the keys of func.__dict__ (and therefore our
+    # attribute) over to the wrapper.
     wrapper._argvard_annotations = IS_ANNOTATED
+
     return wrapper
 
 

@@ -36,3 +36,13 @@ Context Object
 
 .. autoclass:: Context
    :members:
+
+Annotations
+-----------
+
+.. autofunction:: annotations
+
+Exceptions
+----------
+
+.. autoclass:: UsageError

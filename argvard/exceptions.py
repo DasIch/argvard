@@ -26,7 +26,12 @@ class InvalidSignature(Exception):
 
 
 class UsageError(Exception):
-    pass
+    """
+    The user used the program or command in a wrong way.
+
+    Raise this exception inside your functions to make argvard display the
+    message, show the help page and exit.
+    """
 
 
 class ArgumentMissing(UsageError):

@@ -10,6 +10,9 @@ Version 0.3.1
   it's tested.
 - Fix an issue that caused docstrings to not be properly dedented when used
   as descriptions, producing among other things badly formatted help text.
+- Added ability to raise :py:exc:`argvard.UsageError` inside functions to get
+  help output.
+- Added :doc:`annotations </user/arguments>` as a way of validating user input.
 
 Version 0.3.0
 -------------
